@@ -1,22 +1,42 @@
 ---
 import { Image } from "astro:assets";
 
+interface EventInfo {
+  location: string;
+  date: string;
+}
+
+// Every photo currently in src/assets/photos is from this event.
+const DEFAULT_EVENT: EventInfo = { location: "Ring Knutstorp", date: "26 Jul 2026" };
+
+// TODO(filip): once Norra Åsum photos are dropped in, key their filenames (no extension) here,
+// e.g. "kart-01": { location: "Norra Åsum", date: "2 Aug 2026" }.
+const EVENT_OVERRIDES: Record<string, EventInfo> = {};
+
 const photoModules = import.meta.glob<{ default: ImageMetadata }>(
   "/src/assets/photos/*.{jpeg,jpg,png,webp,avif}",
   { eager: true },
 );
 
-function titleFromPath(path: string): string {
+function slugFromPath(path: string): string {
   const filename = path.split("/").pop() ?? path;
-  const withoutExt = filename.replace(/\.[^.]+$/, "");
-  return withoutExt.replace(/[-_]+/g, " ");
+  return filename.replace(/\.[^.]+$/, "");
+}
+
+function titleFromSlug(slug: string): string {
+  return slug.replace(/[-_]+/g, " ");
 }
 
 const photos = Object.entries(photoModules)
-  .map(([path, mod]) => ({
-    image: mod.default,
-    caption: titleFromPath(path),
-  }))
+  .map(([path, mod]) => {
+    const slug = slugFromPath(path);
+    const event = EVENT_OVERRIDES[slug] ?? DEFAULT_EVENT;
+    return {
+      image: mod.default,
+      caption: titleFromSlug(slug),
+      event,
+    };
+  })
   .sort((a, b) => a.caption.localeCompare(b.caption));
 ---
 
@@ -24,21 +44,27 @@ const photos = Object.entries(photoModules)
   <header class="photographer__intro">
     <h1 class="photographer__title">Filip Klaič</h1>
     <p class="photographer__subtitle">Photography</p>
-    <!-- TODO(filip): personalize this — starting point based on the racetrack shots. -->
     <p class="photographer__about">
-      I started bringing a camera to trackdays almost by accident — now it's half the reason I go. Chasing the
-      exact moment a bike tips into an apex, or the quiet stillness of a paddock before the first session, has
-      become as satisfying as writing the software I build the rest of the week.
+      I ride myself, but it was photography that got me riding more — chasing friends around the track just to
+      bring back shots they'd actually want to post. That turned into something bigger: I want to shoot for the
+      people at the track, riders and spectators alike, not just for myself. I shoot on a Sony A6700 with a
+      70&ndash;350mm G OSS, usually chasing the moment a bike tips into an apex or the quiet of the paddock before
+      the first session.
     </p>
   </header>
 
   {
     photos.length > 0 ? (
       <ul class="photographer__grid">
-        {photos.map(({ image, caption }) => (
+        {photos.map(({ image, caption, event }) => (
           <li class="photographer__item">
-            <Image src={image} alt={caption} width={1400} />
-            <p class="photographer__caption">{caption}</p>
+            <Image src={image} alt={`${caption} — ${event.location}, ${event.date}`} width={1400} />
+            <p class="photographer__caption">
+              {caption}
+              <span class="photographer__event">
+                {event.location}, {event.date}
+              </span>
+            </p>
           </li>
         ))}
       </ul>
@@ -121,6 +147,13 @@ const photos = Object.entries(photoModules)
     font-size: 0.85rem;
     color: var(--color-text-dim);
     text-transform: capitalize;
+  }
+
+  .photographer__event {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.72rem;
+    color: var(--color-accent);
   }
 
   .photographer__empty {

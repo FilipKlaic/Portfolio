@@ -7,6 +7,8 @@ interface Project {
   highlights: string[];
   stack: string[];
   href?: string;
+  repoUrl?: string;
+  repoPrivate?: boolean;
   status?: "live" | "private" | "ongoing";
 }
 
@@ -23,6 +25,7 @@ const projects: Project[] = [
       "Deployed on Vercel, used directly on iPads during service",
     ],
     stack: ["TypeScript", "React", "Vite", "Supabase"],
+    repoPrivate: true,
     status: "private",
   },
   {
@@ -36,6 +39,7 @@ const projects: Project[] = [
       "Role-based access via Supabase auth and row-level security",
     ],
     stack: ["TypeScript", "React", "Vite", "Supabase", "PWA"],
+    repoPrivate: true,
     status: "private",
   },
   {
@@ -48,8 +52,23 @@ const projects: Project[] = [
       "Built as the site for my own dev agency",
     ],
     stack: ["Next.js", "TypeScript", "Motion", "GSAP"],
-    href: "https://kova.studio",
+    href: "https://kova-studio-bice.vercel.app/",
+    repoUrl: "https://github.com/FilipKlaic/Kova-Studio",
     status: "live",
+  },
+  {
+    nickname: "savings",
+    fullName: "Savings Tracker",
+    slug: "savings",
+    description: "Cross-platform desktop app for tracking income/expenses and auto-allocating savings toward goals.",
+    highlights: [
+      "Tauri + Rust backend with SQLite storage via tauri-plugin-sql, migrations applied on first launch",
+      "Dashboard donut chart and savings-rate trend line built with Recharts",
+      "Feature-sliced structure — income, expenses, goals, settings, dashboard, and history each own their own api.ts",
+    ],
+    stack: ["Rust", "Tauri", "TypeScript", "React", "SQLite"],
+    repoUrl: "https://github.com/FilipKlaic/Savings-tracker",
+    status: "ongoing",
   },
   {
     nickname: "rice",
@@ -76,15 +95,15 @@ const projects: Project[] = [
     <h1 class="engineer__title">Filip Klaič</h1>
     <p class="engineer__subtitle">Software engineer / systems dev. TypeScript, React, Supabase, C#.</p>
 
-    <!-- TODO(filip): personalize this — starting point based on what I know about your stack/projects. -->
     <p class="engineer__prompt engineer__prompt--about">
       <span class="engineer__prompt-sep">$</span> cat about.txt
     </p>
     <p class="engineer__about">
-      I build real tools for real problems — usually TypeScript and React on the frontend, Supabase or C# on the
-      backend, deployed and mostly forgotten about until someone needs a new feature. Lately I've been pulled
-      toward the systems side, tuning a Hyprland setup until it's exactly right. If it's not code, it's probably
-      a racetrack.
+      I got into programming through Ehrensvärdska high school's Teknik, Info & Media program, where I first
+      learned C#, HTML, CSS, and JavaScript — and I'm currently studying at the college level as a Systemutvecklare
+      .NET, alongside picking up new languages and frameworks on my own time. What keeps me building is solving
+      problems for people I actually know — the wagon inventory app started as something I built for myself and
+      my coworkers at Fogarolli to make our own shifts easier, and it grew from there.
     </p>
   </header>
 
@@ -163,11 +182,23 @@ const projects: Project[] = [
               <li>{tech}</li>
             ))}
           </ul>
-          {project.href && (
-            <a href={project.href} class="engineer__link" target="_blank" rel="noopener noreferrer">
-              visit &#x2192;
-            </a>
-          )}
+          <div class="engineer__actions">
+            {project.href && (
+              <a href={project.href} class="engineer__link" target="_blank" rel="noopener noreferrer">
+                visit &#x2192;
+              </a>
+            )}
+            {project.repoUrl && (
+              <a href={project.repoUrl} class="engineer__link" target="_blank" rel="noopener noreferrer">
+                github &#x2192;
+              </a>
+            )}
+            {project.repoPrivate && (
+              <span class="engineer__link engineer__link--disabled" aria-disabled="true">
+                private repo
+              </span>
+            )}
+          </div>
         </div>
       </dialog>
     ))
@@ -565,11 +596,17 @@ const projects: Project[] = [
     padding: 0.2rem 0.5rem;
   }
 
-  .engineer__link {
+  .engineer__actions {
     position: relative;
     z-index: 1;
-    display: inline-block;
     margin-top: var(--space-2);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .engineer__link {
+    display: inline-block;
     color: var(--color-accent);
     font-size: 0.82rem;
     text-decoration: none;
@@ -577,5 +614,14 @@ const projects: Project[] = [
 
   .engineer__link:hover {
     text-decoration: underline;
+  }
+
+  .engineer__link--disabled {
+    color: var(--color-text-dim);
+    cursor: not-allowed;
+  }
+
+  .engineer__link--disabled:hover {
+    text-decoration: none;
   }
 </style>
