@@ -1,0 +1,581 @@
+---
+interface Project {
+  nickname: string;
+  fullName: string;
+  slug: string;
+  description: string;
+  highlights: string[];
+  stack: string[];
+  href?: string;
+  status?: "live" | "private" | "ongoing";
+}
+
+// TODO(filip): confirm copy + real links before launch.
+const projects: Project[] = [
+  {
+    nickname: "wagons",
+    fullName: "Fogarolli",
+    slug: "wagons",
+    description: "Wagon inventory tracking tool used on iPads during live catering events.",
+    highlights: [
+      "Real-time inventory counts across catering wagons, synced through Supabase",
+      "Swedish-language UI built for on-the-ground staff at events",
+      "Deployed on Vercel, used directly on iPads during service",
+    ],
+    stack: ["TypeScript", "React", "Vite", "Supabase"],
+    status: "private",
+  },
+  {
+    nickname: "shifts",
+    fullName: "Fogarolli Schedule",
+    slug: "shifts",
+    description: "Companion PWA for shift scheduling and availability, sharing the same Supabase backend.",
+    highlights: [
+      "Installable on employees' phones as a PWA",
+      "Admin creates shifts; staff mark availability and acknowledge assignments",
+      "Role-based access via Supabase auth and row-level security",
+    ],
+    stack: ["TypeScript", "React", "Vite", "Supabase", "PWA"],
+    status: "private",
+  },
+  {
+    nickname: "kova",
+    fullName: "Kova Studio",
+    slug: "kova",
+    description: "Dev agency site with heavy motion work — case studies, animated transitions, brand system.",
+    highlights: [
+      "Case studies built around scroll-driven motion sequences",
+      "Built as the site for my own dev agency",
+    ],
+    stack: ["Next.js", "TypeScript", "Motion", "GSAP"],
+    href: "https://kova.studio",
+    status: "live",
+  },
+  {
+    nickname: "rice",
+    fullName: "Hyprland Rice",
+    slug: "rice",
+    description: "A fully themed Hyprland desktop with a dynamic color pipeline generated from the wallpaper.",
+    highlights: [
+      "matugen extracts a Material You palette from the current wallpaper and pushes it live to Waybar, Kitty, SwayNC, GTK, and Rofi",
+      "Custom Hyprland animation curves — spring-based window opens, overshoot workspace transitions",
+      "Hand-built GTK3 theme for Thunar, outside the matugen pipeline",
+    ],
+    stack: ["Hyprland", "Lua", "Waybar", "GTK"],
+    status: "ongoing",
+  },
+];
+---
+
+<section data-panel="engineer" class="engineer">
+  <header class="engineer__intro">
+    <p class="engineer__prompt">
+      <span class="engineer__prompt-user">filip@portfolio</span><span class="engineer__prompt-sep">:</span><span
+        class="engineer__prompt-path">~</span><span class="engineer__prompt-sep">$</span> whoami
+    </p>
+    <h1 class="engineer__title">Filip Klaič</h1>
+    <p class="engineer__subtitle">Software engineer / systems dev. TypeScript, React, Supabase, C#.</p>
+
+    <!-- TODO(filip): personalize this — starting point based on what I know about your stack/projects. -->
+    <p class="engineer__prompt engineer__prompt--about">
+      <span class="engineer__prompt-sep">$</span> cat about.txt
+    </p>
+    <p class="engineer__about">
+      I build real tools for real problems — usually TypeScript and React on the frontend, Supabase or C# on the
+      backend, deployed and mostly forgotten about until someone needs a new feature. Lately I've been pulled
+      toward the systems side, tuning a Hyprland setup until it's exactly right. If it's not code, it's probably
+      a racetrack.
+    </p>
+  </header>
+
+  <div class="engineer__section-label">
+    <span class="engineer__prompt-sep">$</span> ls ./projects
+  </div>
+
+  <ul class="engineer__grid">
+    {
+      projects.map((project) => (
+        <li>
+          <button
+            type="button"
+            class="engineer__card"
+            aria-haspopup="dialog"
+            data-dialog-target={`dialog-${project.slug}`}
+          >
+            <span class="engineer__win-bar">
+              <span class="engineer__win-dots" aria-hidden="true">
+                <span /><span /><span />
+              </span>
+              <span class="engineer__win-path">~/projects/{project.nickname}</span>
+            </span>
+            <span class="engineer__card-body">
+              <span class="engineer__card-top">
+                <span class="engineer__card-name">&gt; {project.nickname}</span>
+                {project.status && (
+                  <span class="engineer__status" data-status={project.status}>
+                    {project.status}
+                  </span>
+                )}
+              </span>
+              <span class="engineer__card-desc">{project.description}</span>
+              <span class="engineer__card-hint">more<span class="engineer__cursor" aria-hidden="true">_</span></span>
+            </span>
+          </button>
+        </li>
+      ))
+    }
+  </ul>
+
+  <footer class="engineer__footer">
+    <span class="engineer__prompt-sep">$</span> mail --to file.klaic@gmail.com
+  </footer>
+
+  {
+    projects.map((project) => (
+      <dialog id={`dialog-${project.slug}`} class="engineer__dialog" aria-labelledby={`dialog-${project.slug}-title`}>
+        <div class="engineer__win-bar engineer__win-bar--dialog">
+          <span class="engineer__win-dots" aria-hidden="true">
+            <span /><span /><span />
+          </span>
+          <span class="engineer__win-path">~/projects/{project.slug}.sh</span>
+          <button type="button" class="engineer__dialog-close" data-dialog-close aria-label="Close">
+            &#x2715;
+          </button>
+        </div>
+        <div class="engineer__dialog-content">
+          <p class="engineer__prompt-mini">&gt; {project.nickname}</p>
+          <h2 id={`dialog-${project.slug}-title`} class="engineer__dialog-title">
+            {project.fullName}
+          </h2>
+          {project.status && (
+            <span class="engineer__status" data-status={project.status}>
+              {project.status}
+            </span>
+          )}
+          <p class="engineer__dialog-desc">{project.description}</p>
+          <ul class="engineer__highlights">
+            {project.highlights.map((point) => (
+              <li>{point}</li>
+            ))}
+          </ul>
+          <ul class="engineer__stack">
+            {project.stack.map((tech) => (
+              <li>{tech}</li>
+            ))}
+          </ul>
+          {project.href && (
+            <a href={project.href} class="engineer__link" target="_blank" rel="noopener noreferrer">
+              visit &#x2192;
+            </a>
+          )}
+        </div>
+      </dialog>
+    ))
+  }
+</section>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>("[data-dialog-target]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.dialogTarget;
+      const dialog = id ? document.getElementById(id) : null;
+      if (dialog instanceof HTMLDialogElement) dialog.showModal();
+    });
+  });
+
+  document.querySelectorAll<HTMLDialogElement>(".engineer__dialog").forEach((dialog) => {
+    dialog.querySelector("[data-dialog-close]")?.addEventListener("click", () => dialog.close());
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+  });
+</script>
+
+<style>
+  .engineer {
+    max-width: 60rem;
+    margin: 0 auto;
+    padding: var(--space-6) var(--space-3) var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  .engineer__prompt {
+    color: var(--color-text-dim);
+    font-size: 0.9rem;
+    margin-bottom: var(--space-2);
+  }
+
+  .engineer__prompt-user {
+    color: var(--color-accent);
+  }
+
+  .engineer__prompt-sep {
+    color: var(--color-text-dim);
+    margin: 0 0.1rem;
+  }
+
+  .engineer__title {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .engineer__subtitle {
+    margin-top: var(--space-2);
+    max-width: 38rem;
+    color: var(--color-text-dim);
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  .engineer__prompt--about {
+    margin-top: var(--space-4);
+    margin-bottom: 0;
+  }
+
+  .engineer__about {
+    margin-top: var(--space-1);
+    max-width: 38rem;
+    color: var(--color-text);
+    font-size: 0.92rem;
+    line-height: 1.7;
+  }
+
+  .engineer__section-label {
+    color: var(--color-text-dim);
+    font-size: 0.85rem;
+  }
+
+  .engineer__grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    grid-auto-rows: 1fr;
+    gap: var(--space-2);
+  }
+
+  /* Terminal window chrome, shared by cards + dialog ----------------------- */
+
+  .engineer__win-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: 0.45rem 0.6rem;
+    background: color-mix(in srgb, var(--color-bg) 55%, var(--color-bg-raised) 45%);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .engineer__win-dots {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .engineer__win-dots span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-border);
+  }
+
+  .engineer__win-path {
+    font-size: 0.68rem;
+    color: var(--color-text-dim);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Card -------------------------------------------------------------------- */
+
+  .engineer__card {
+    position: relative;
+    appearance: none;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    border: 1px solid var(--color-border);
+    border-radius: 3px;
+    background: var(--color-bg-raised);
+    color: inherit;
+    font-family: var(--font-mono);
+    padding: 0;
+    overflow: hidden;
+    cursor: pointer;
+    transition:
+      border-color var(--transition-duration) var(--transition-easing),
+      box-shadow var(--transition-duration) var(--transition-easing);
+  }
+
+  .engineer__card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    mix-blend-mode: overlay;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.03) 0px,
+      rgba(255, 255, 255, 0.03) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+  }
+
+  .engineer__card:hover {
+    border-color: var(--color-accent);
+    box-shadow:
+      0 0 0 1px var(--color-accent),
+      0 0 28px -8px var(--color-accent);
+  }
+
+  .engineer__card-body {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-3);
+  }
+
+  .engineer__card-top {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+  }
+
+  .engineer__card-name {
+    color: var(--color-accent);
+    font-weight: 500;
+  }
+
+  .engineer__status {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-dim);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    padding: 0.1rem 0.4rem;
+  }
+
+  .engineer__status[data-status="live"] {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+
+  .engineer__card-desc {
+    color: var(--color-text-dim);
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+
+  .engineer__card-hint {
+    margin-top: auto;
+    padding-top: var(--space-1);
+    color: var(--color-text-dim);
+    font-size: 0.72rem;
+  }
+
+  .engineer__cursor {
+    display: inline-block;
+    margin-left: 1px;
+    color: var(--color-accent);
+    animation: engineer-blink 1s steps(1) infinite;
+  }
+
+  @keyframes engineer-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  .engineer__footer {
+    color: var(--color-text-dim);
+    font-size: 0.85rem;
+  }
+
+  /* Dialog ---------------------------------------------------------------- */
+
+  .engineer__dialog {
+    border: 1px solid var(--color-border);
+    border-radius: 3px;
+    background: var(--color-bg-raised);
+    color: var(--color-text);
+    padding: 0;
+    max-width: 30rem;
+    width: calc(100% - 2.5rem);
+    overflow: hidden;
+    box-shadow:
+      0 0 0 1px var(--color-accent),
+      0 0 60px -10px var(--color-accent);
+  }
+
+  .engineer__dialog::backdrop {
+    background: color-mix(in srgb, var(--color-bg) 75%, transparent);
+    backdrop-filter: blur(6px);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .engineer__dialog[open] {
+      animation: engineer-dialog-in 460ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .engineer__dialog::backdrop {
+      animation: engineer-backdrop-in 460ms ease;
+    }
+  }
+
+  @keyframes engineer-dialog-in {
+    0% {
+      clip-path: inset(49.5% 50% 49.5% 50%);
+      box-shadow:
+        0 0 0 1px var(--color-accent),
+        0 0 0 0 transparent;
+    }
+    35% {
+      clip-path: inset(49.5% 0% 49.5% 0%);
+      box-shadow:
+        0 0 0 1px var(--color-accent),
+        0 0 12px -2px var(--color-accent);
+    }
+    100% {
+      clip-path: inset(0% 0% 0% 0%);
+      box-shadow:
+        0 0 0 1px var(--color-accent),
+        0 0 60px -10px var(--color-accent);
+    }
+  }
+
+  @keyframes engineer-backdrop-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .engineer__win-bar--dialog .engineer__win-path {
+    flex: 1;
+  }
+
+  .engineer__dialog-close {
+    appearance: none;
+    border: none;
+    background: none;
+    color: var(--color-text-dim);
+    font-size: 0.85rem;
+    cursor: pointer;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .engineer__dialog-close:hover {
+    color: var(--color-accent);
+  }
+
+  .engineer__dialog-content {
+    position: relative;
+    padding: var(--space-3);
+  }
+
+  .engineer__dialog-content::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    mix-blend-mode: overlay;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.03) 0px,
+      rgba(255, 255, 255, 0.03) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+  }
+
+  .engineer__prompt-mini {
+    position: relative;
+    z-index: 1;
+    color: var(--color-accent);
+    font-size: 0.8rem;
+  }
+
+  .engineer__dialog-title {
+    position: relative;
+    z-index: 1;
+    margin-top: 0.25rem;
+    font-size: 1.4rem;
+    font-weight: 700;
+  }
+
+  .engineer__dialog-desc {
+    position: relative;
+    z-index: 1;
+    margin-top: var(--space-2);
+    color: var(--color-text-dim);
+    font-size: 0.88rem;
+    line-height: 1.55;
+  }
+
+  .engineer__highlights {
+    position: relative;
+    z-index: 1;
+    margin: var(--space-2) 0 0;
+    padding-left: 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .engineer__highlights li {
+    color: var(--color-text-dim);
+    font-size: 0.82rem;
+    line-height: 1.5;
+  }
+
+  .engineer__highlights li::marker {
+    color: var(--color-accent);
+  }
+
+  .engineer__stack {
+    position: relative;
+    z-index: 1;
+    list-style: none;
+    margin: var(--space-2) 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .engineer__stack li {
+    font-size: 0.72rem;
+    color: var(--color-text-dim);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    padding: 0.2rem 0.5rem;
+  }
+
+  .engineer__link {
+    position: relative;
+    z-index: 1;
+    display: inline-block;
+    margin-top: var(--space-2);
+    color: var(--color-accent);
+    font-size: 0.82rem;
+    text-decoration: none;
+  }
+
+  .engineer__link:hover {
+    text-decoration: underline;
+  }
+</style>

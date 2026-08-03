@@ -1,0 +1,42 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "Filip Klaič — Software Engineer / Systems Dev / Photographer",
+  description = "Portfolio of Filip Klaič: software engineering, systems work, and photography.",
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" data-mode="engineer">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;1,9..144,400&display=swap"
+      rel="stylesheet"
+    />
+
+    <script is:inline>
+      // Set mode before paint to avoid a flash of the wrong theme.
+      const stored = localStorage.getItem("mode");
+      if (stored === "photographer") {
+        document.documentElement.dataset.mode = "photographer";
+      }
+    </script>
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

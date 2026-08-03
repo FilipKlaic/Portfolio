@@ -1,0 +1,103 @@
+---
+---
+
+<div class="mode-switcher" role="group" aria-label="Site mode">
+  <button type="button" class="mode-switcher__option" data-mode-target="engineer">
+    <span aria-hidden="true">&#x2325;</span> Engineer
+  </button>
+  <button type="button" class="mode-switcher__option" data-mode-target="photographer">
+    Photographer
+  </button>
+  <span class="mode-switcher__thumb" aria-hidden="true"></span>
+</div>
+
+<style>
+  .mode-switcher {
+    position: fixed;
+    top: var(--space-2);
+    right: var(--space-2);
+    z-index: 50;
+    display: inline-flex;
+    gap: 2px;
+    padding: 4px;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-bg-raised) 85%, transparent);
+    backdrop-filter: blur(8px);
+  }
+
+  .mode-switcher__option {
+    position: relative;
+    z-index: 1;
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: var(--color-text-dim);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    padding: 0.45rem 0.9rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition:
+      color var(--transition-duration) var(--transition-easing);
+  }
+
+  .mode-switcher__option[aria-pressed="true"] {
+    color: var(--color-bg);
+  }
+
+  .mode-switcher__thumb {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 4px;
+    width: calc(50% - 4px);
+    border-radius: 999px;
+    background: var(--color-accent);
+    transition:
+      transform var(--transition-duration) var(--transition-easing),
+      background var(--transition-duration) var(--transition-easing);
+  }
+
+  html[data-mode="photographer"] .mode-switcher__thumb {
+    transform: translateX(100%);
+  }
+</style>
+
+<script>
+  function currentMode(): "engineer" | "photographer" {
+    return document.documentElement.dataset.mode === "photographer" ? "photographer" : "engineer";
+  }
+
+  function syncButtons() {
+    const mode = currentMode();
+    document.querySelectorAll<HTMLButtonElement>("[data-mode-target]").forEach((btn) => {
+      btn.setAttribute("aria-pressed", String(btn.dataset.modeTarget === mode));
+    });
+  }
+
+  function applyMode(next: "engineer" | "photographer") {
+    document.documentElement.dataset.mode = next;
+    localStorage.setItem("mode", next);
+    syncButtons();
+  }
+
+  function setMode(next: "engineer" | "photographer") {
+    if (next === currentMode()) return;
+
+    if (document.startViewTransition) {
+      document.startViewTransition(() => applyMode(next));
+    } else {
+      applyMode(next);
+    }
+  }
+
+  document.querySelectorAll<HTMLButtonElement>("[data-mode-target]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const target = btn.dataset.modeTarget;
+      if (target === "engineer" || target === "photographer") setMode(target);
+    });
+  });
+
+  syncButtons();
+</script>

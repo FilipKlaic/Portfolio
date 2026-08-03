@@ -1,0 +1,101 @@
+/* Design tokens ------------------------------------------------------- */
+
+:root {
+  /* base surface */
+  --color-bg: #0b0c0f;
+  --color-bg-raised: #131519;
+  --color-border: #23262c;
+
+  --color-text: #e8e6e1;
+  --color-text-dim: #8b8d94;
+
+  /* per-mode accents */
+  --color-accent-engineer: #7fd6c2; /* muted terminal cyan */
+  --color-accent-photographer: #e0a458; /* warm amber, editorial */
+
+  /* active accent, swapped by ModeSwitcher via data-mode */
+  --color-accent: var(--color-accent-engineer);
+
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --font-serif: "Fraunces", Georgia, "Times New Roman", serif;
+
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2.5rem;
+  --space-5: 4rem;
+  --space-6: 6rem;
+
+  --transition-duration: 420ms;
+  --transition-easing: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+:root[data-mode="photographer"] {
+  --color-accent: var(--color-accent-photographer);
+}
+
+/* Reset ----------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  line-height: 1.5;
+  min-height: 100svh;
+  transition:
+    background var(--transition-duration) var(--transition-easing),
+    color var(--transition-duration) var(--transition-easing);
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: var(--color-bg);
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+/* Mode panels ------------------------------------------------------------ */
+
+[data-panel] {
+  display: none !important;
+}
+
+html[data-mode="engineer"] [data-panel="engineer"] {
+  display: block !important;
+}
+
+html[data-mode="photographer"] [data-panel="photographer"] {
+  display: block !important;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--transition-duration);
+  animation-timing-function: var(--transition-easing);
+}

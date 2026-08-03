@@ -1,0 +1,137 @@
+---
+import { Image } from "astro:assets";
+
+const photoModules = import.meta.glob<{ default: ImageMetadata }>(
+  "/src/assets/photos/*.{jpeg,jpg,png,webp,avif}",
+  { eager: true },
+);
+
+function titleFromPath(path: string): string {
+  const filename = path.split("/").pop() ?? path;
+  const withoutExt = filename.replace(/\.[^.]+$/, "");
+  return withoutExt.replace(/[-_]+/g, " ");
+}
+
+const photos = Object.entries(photoModules)
+  .map(([path, mod]) => ({
+    image: mod.default,
+    caption: titleFromPath(path),
+  }))
+  .sort((a, b) => a.caption.localeCompare(b.caption));
+---
+
+<section data-panel="photographer" class="photographer">
+  <header class="photographer__intro">
+    <h1 class="photographer__title">Filip Klaič</h1>
+    <p class="photographer__subtitle">Photography</p>
+    <!-- TODO(filip): personalize this — starting point based on the racetrack shots. -->
+    <p class="photographer__about">
+      I started bringing a camera to trackdays almost by accident — now it's half the reason I go. Chasing the
+      exact moment a bike tips into an apex, or the quiet stillness of a paddock before the first session, has
+      become as satisfying as writing the software I build the rest of the week.
+    </p>
+  </header>
+
+  {
+    photos.length > 0 ? (
+      <ul class="photographer__grid">
+        {photos.map(({ image, caption }) => (
+          <li class="photographer__item">
+            <Image src={image} alt={caption} width={1400} />
+            <p class="photographer__caption">{caption}</p>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p class="photographer__empty">
+        Photos coming soon — drop files into <code>src/assets/photos</code>.
+      </p>
+    )
+  }
+</section>
+
+<style>
+  .photographer {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: var(--space-6) var(--space-3) var(--space-5);
+  }
+
+  .photographer__intro {
+    margin-bottom: var(--space-5);
+    font-family: var(--font-serif);
+  }
+
+  .photographer__title {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+  .photographer__subtitle {
+    margin-top: var(--space-1);
+    color: var(--color-text-dim);
+    font-style: italic;
+    font-size: 1.1rem;
+  }
+
+  .photographer__about {
+    margin-top: var(--space-3);
+    max-width: 34rem;
+    color: var(--color-text);
+    font-size: 1rem;
+    line-height: 1.7;
+  }
+
+  .photographer__grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    columns: 1;
+    column-gap: var(--space-3);
+  }
+
+  @media (min-width: 640px) {
+    .photographer__grid {
+      columns: 2;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .photographer__grid {
+      columns: 3;
+    }
+  }
+
+  .photographer__item {
+    break-inside: avoid;
+    margin-bottom: var(--space-3);
+  }
+
+  .photographer__item :global(img) {
+    width: 100%;
+    height: auto;
+    border-radius: 2px;
+  }
+
+  .photographer__caption {
+    margin-top: var(--space-1);
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 0.85rem;
+    color: var(--color-text-dim);
+    text-transform: capitalize;
+  }
+
+  .photographer__empty {
+    color: var(--color-text-dim);
+    font-family: var(--font-serif);
+    font-style: italic;
+  }
+
+  .photographer__empty code {
+    font-family: var(--font-mono);
+    font-style: normal;
+    color: var(--color-accent);
+  }
+</style>
