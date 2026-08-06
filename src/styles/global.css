@@ -10,7 +10,7 @@
   --color-text-dim: #8b8d94;
 
   /* per-mode accents */
-  --color-accent-engineer: #7fd6c2; /* muted terminal cyan */
+  --color-accent-engineer: #33e1ff; /* electric phosphor blue */
   --color-accent-photographer: #e0a458; /* warm amber, editorial */
 
   /* active accent, swapped by ModeSwitcher via data-mode */

@@ -4,13 +4,14 @@ import { Image } from "astro:assets";
 interface EventInfo {
   location: string;
   date: string;
+  dateSort: string; // ISO yyyy-mm-dd, used to order event groups newest-first
 }
 
 // Every photo currently in src/assets/photos is from this event.
-const DEFAULT_EVENT: EventInfo = { location: "Ring Knutstorp", date: "26 Jul 2026" };
+const DEFAULT_EVENT: EventInfo = { location: "Ring Knutstorp", date: "26 Jul 2026", dateSort: "2026-07-26" };
 
 // TODO(filip): once Norra Åsum photos are dropped in, key their filenames (no extension) here,
-// e.g. "kart-01": { location: "Norra Åsum", date: "2 Aug 2026" }.
+// e.g. "kart-01": { location: "Norra Åsum", date: "2 Aug 2026", dateSort: "2026-08-02" }.
 const EVENT_OVERRIDES: Record<string, EventInfo> = {};
 
 const photoModules = import.meta.glob<{ default: ImageMetadata }>(
@@ -27,7 +28,13 @@ function titleFromSlug(slug: string): string {
   return slug.replace(/[-_]+/g, " ");
 }
 
-const photos = Object.entries(photoModules)
+interface Photo {
+  image: ImageMetadata;
+  caption: string;
+  event: EventInfo;
+}
+
+const photos: Photo[] = Object.entries(photoModules)
   .map(([path, mod]) => {
     const slug = slugFromPath(path);
     const event = EVENT_OVERRIDES[slug] ?? DEFAULT_EVENT;
@@ -38,75 +45,336 @@ const photos = Object.entries(photoModules)
     };
   })
   .sort((a, b) => a.caption.localeCompare(b.caption));
+
+interface EventGroup {
+  key: string;
+  event: EventInfo;
+  photos: Photo[];
+}
+
+const groups: EventGroup[] = Array.from(
+  photos
+    .reduce((map, photo) => {
+      const key = `${photo.event.location}|${photo.event.date}`;
+      const group = map.get(key) ?? { key, event: photo.event, photos: [] };
+      group.photos.push(photo);
+      map.set(key, group);
+      return map;
+    }, new Map<string, EventGroup>())
+    .values(),
+).sort((a, b) => b.event.dateSort.localeCompare(a.event.dateSort));
+
+const heroPhoto = photos.find((p) => p.caption === "apex lean 01") ?? photos[0];
+
+// Film-grain texture, built as a data URI so the SVG never needs hand-escaping.
+const grainSvg = `<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='grain'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(#grain)'/></svg>`;
+const grainDataUri = `data:image/svg+xml,${encodeURIComponent(grainSvg)}`;
 ---
 
 <section data-panel="photographer" class="photographer">
-  <header class="photographer__intro">
-    <h1 class="photographer__title">Filip Klaič</h1>
-    <p class="photographer__subtitle">Photography</p>
+  <div class="photographer__grain" style={`--grain-bg: url("${grainDataUri}")`} aria-hidden="true"></div>
+
+  {
+    heroPhoto && (
+      <div class="photographer__hero">
+        <Image src={heroPhoto.image} alt="" width={2000} class="photographer__hero-img" />
+        <div class="photographer__hero-scrim" aria-hidden="true" />
+        <div class="photographer__hero-content">
+          <h1 class="photographer__hero-title">Filip Klaic</h1>
+          <p class="photographer__hero-subtitle">Motorsport &amp; trackside photography</p>
+        </div>
+      </div>
+    )
+  }
+
+  <div class="photographer__body">
     <p class="photographer__about">
       I ride myself, but it was photography that got me riding more — chasing friends around the track just to
       bring back shots they'd actually want to post. That turned into something bigger: I want to shoot for the
-      people at the track, riders and spectators alike, not just for myself. I shoot on a Sony A6700 with a
-      70&ndash;350mm G OSS, usually chasing the moment a bike tips into an apex or the quiet of the paddock before
-      the first session.
+      people at the track, riders and spectators alike, not just for myself.
     </p>
-  </header>
+    <p class="photographer__gear">
+      <span class="photographer__gear-label">Shooting on</span>Sony A6700 &middot; 70&ndash;350mm G OSS
+    </p>
 
-  {
-    photos.length > 0 ? (
-      <ul class="photographer__grid">
-        {photos.map(({ image, caption, event }) => (
-          <li class="photographer__item">
-            <Image src={image} alt={`${caption} — ${event.location}, ${event.date}`} width={1400} />
-            <p class="photographer__caption">
-              {caption}
-              <span class="photographer__event">
-                {event.location}, {event.date}
-              </span>
-            </p>
-          </li>
-        ))}
-      </ul>
-    ) : (
-      <p class="photographer__empty">
-        Photos coming soon — drop files into <code>src/assets/photos</code>.
-      </p>
-    )
-  }
+    {
+      photos.length > 0 ? (
+        groups.map((group, groupIndex) => {
+          const rollLetter = String.fromCharCode(65 + groupIndex);
+          return (
+            <section class="photographer__roll">
+              <div class="photographer__roll-label">
+                <span class="photographer__roll-index">Roll {String(groupIndex + 1).padStart(2, "0")}</span>
+                <span class="photographer__roll-name">{group.event.location}</span>
+                <span class="photographer__roll-date">{group.event.date}</span>
+              </div>
+
+              <ul class="photographer__grid">
+                {group.photos.map((photo, photoIndex) => (
+                  <li class="photographer__item">
+                    <button type="button" class="photographer__thumb">
+                      <span class="photographer__perf" aria-hidden="true" />
+                      <Image
+                        src={photo.image}
+                        alt={`${photo.caption} — ${photo.event.location}, ${photo.event.date}`}
+                        width={1400}
+                      />
+                      <span class="photographer__frame-number" aria-hidden="true">
+                        {String(photoIndex + 1).padStart(2, "0")}
+                        {rollLetter}
+                      </span>
+                      <span class="photographer__perf" aria-hidden="true" />
+                    </button>
+                    <p class="photographer__caption">{photo.caption}</p>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          );
+        })
+      ) : (
+        <p class="photographer__empty">
+          Photos coming soon — drop files into <code>src/assets/photos</code>.
+        </p>
+      )
+    }
+  </div>
+
+  <dialog class="photographer__lightbox" aria-label="Photo viewer">
+    <div class="photographer__lightbox-inner">
+      <button type="button" class="photographer__lightbox-close" data-lightbox-close aria-label="Close">
+        &#x2715;
+      </button>
+      <div class="photographer__lightbox-stage">
+        <button
+          type="button"
+          class="photographer__lightbox-nav photographer__lightbox-nav--prev"
+          data-lightbox-prev
+          aria-label="Previous photo"
+        >
+          &#x2039;
+        </button>
+        <div class="photographer__lightbox-frame">
+          <span class="photographer__perf" aria-hidden="true" />
+          <img class="photographer__lightbox-img" data-lightbox-img alt="" />
+          <span class="photographer__perf" aria-hidden="true" />
+        </div>
+        <button
+          type="button"
+          class="photographer__lightbox-nav photographer__lightbox-nav--next"
+          data-lightbox-next
+          aria-label="Next photo"
+        >
+          &#x203a;
+        </button>
+      </div>
+      <div class="photographer__lightbox-meta">
+        <p class="photographer__lightbox-caption" data-lightbox-caption />
+        <p class="photographer__lightbox-info">
+          <span data-lightbox-counter />
+          <span class="photographer__lightbox-gear">Sony A6700 &middot; 70&ndash;350mm G OSS</span>
+        </p>
+      </div>
+    </div>
+  </dialog>
 </section>
+
+<script>
+  const thumbs = Array.from(document.querySelectorAll<HTMLButtonElement>(".photographer__thumb"));
+  const lightbox = document.querySelector<HTMLDialogElement>(".photographer__lightbox");
+  const lightboxImg = lightbox?.querySelector<HTMLImageElement>("[data-lightbox-img]");
+  const lightboxCaption = lightbox?.querySelector<HTMLParagraphElement>("[data-lightbox-caption]");
+  const lightboxCounter = lightbox?.querySelector<HTMLSpanElement>("[data-lightbox-counter]");
+  const prevBtn = lightbox?.querySelector<HTMLButtonElement>("[data-lightbox-prev]");
+  const nextBtn = lightbox?.querySelector<HTMLButtonElement>("[data-lightbox-next]");
+
+  let currentIndex = 0;
+
+  function renderCurrent() {
+    const thumb = thumbs[currentIndex];
+    const img = thumb?.querySelector("img");
+    if (!thumb || !img || !lightboxImg || !lightboxCaption || !lightboxCounter) return;
+    lightboxImg.src = img.currentSrc || img.src;
+    lightboxImg.alt = img.alt;
+    lightboxCaption.textContent = img.alt;
+    lightboxCounter.textContent = `Frame ${currentIndex + 1} / ${thumbs.length}`;
+  }
+
+  function openAt(index: number) {
+    currentIndex = index;
+    renderCurrent();
+    lightbox?.showModal();
+  }
+
+  function step(delta: number) {
+    if (thumbs.length === 0) return;
+    currentIndex = (currentIndex + delta + thumbs.length) % thumbs.length;
+    renderCurrent();
+  }
+
+  thumbs.forEach((thumb, index) => {
+    thumb.addEventListener("click", () => openAt(index));
+  });
+
+  if (thumbs.length <= 1) {
+    prevBtn?.setAttribute("hidden", "");
+    nextBtn?.setAttribute("hidden", "");
+  }
+
+  prevBtn?.addEventListener("click", () => step(-1));
+  nextBtn?.addEventListener("click", () => step(1));
+
+  lightbox?.querySelector("[data-lightbox-close]")?.addEventListener("click", () => lightbox.close());
+  lightbox?.addEventListener("click", (event) => {
+    if (event.target === lightbox) lightbox.close();
+  });
+  lightbox?.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowLeft") step(-1);
+    if (event.key === "ArrowRight") step(1);
+  });
+</script>
 
 <style>
   .photographer {
+    position: relative;
+  }
+
+  .photographer__grain {
+    position: fixed;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+    background-image: var(--grain-bg);
+    background-size: 180px 180px;
+  }
+
+  /* Hero -------------------------------------------------------------------- */
+
+  .photographer__hero {
+    position: relative;
+    height: min(78vh, 700px);
+    overflow: hidden;
+  }
+
+  .photographer__hero :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 42%;
+    filter: saturate(0.92) contrast(1.05);
+  }
+
+  .photographer__hero-scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to top,
+      var(--color-bg) 0%,
+      color-mix(in srgb, var(--color-bg) 55%, transparent) 35%,
+      transparent 70%
+    );
+  }
+
+  .photographer__hero-content {
+    position: absolute;
+    left: var(--space-3);
+    right: var(--space-3);
+    bottom: var(--space-5);
     max-width: 72rem;
     margin: 0 auto;
-    padding: var(--space-6) var(--space-3) var(--space-5);
   }
 
-  .photographer__intro {
-    margin-bottom: var(--space-5);
+  .photographer__hero-title {
     font-family: var(--font-serif);
-  }
-
-  .photographer__title {
-    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-size: clamp(2.5rem, 8vw, 5rem);
     font-weight: 500;
     letter-spacing: -0.01em;
+    color: var(--color-text);
+    text-shadow: 0 2px 24px rgba(0, 0, 0, 0.55);
   }
 
-  .photographer__subtitle {
+  .photographer__hero-subtitle {
     margin-top: var(--space-1);
-    color: var(--color-text-dim);
+    font-family: var(--font-serif);
     font-style: italic;
+    color: var(--color-text-dim);
     font-size: 1.1rem;
+    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.55);
+  }
+
+  /* Body ---------------------------------------------------------------------- */
+
+  .photographer__body {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: var(--space-5) var(--space-3) var(--space-6);
   }
 
   .photographer__about {
-    margin-top: var(--space-3);
     max-width: 34rem;
+    font-family: var(--font-serif);
     color: var(--color-text);
     font-size: 1rem;
     line-height: 1.7;
+  }
+
+  .photographer__gear {
+    margin-top: var(--space-2);
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 0.85rem;
+    color: var(--color-text-dim);
+  }
+
+  .photographer__gear-label {
+    margin-right: 0.4rem;
+    font-style: normal;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    color: var(--color-accent);
+  }
+
+  /* Roll / group ---------------------------------------------------------------- */
+
+  .photographer__roll {
+    margin-top: var(--space-6);
+  }
+
+  .photographer__roll-label {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px dashed var(--color-border);
+  }
+
+  .photographer__roll-index {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    border: 1px solid var(--color-accent);
+    border-radius: 3px;
+    padding: 0.15rem 0.5rem;
+  }
+
+  .photographer__roll-name {
+    font-family: var(--font-serif);
+    font-size: 1.15rem;
+    color: var(--color-text);
+  }
+
+  .photographer__roll-date {
+    margin-left: auto;
+    font-size: 0.8rem;
+    font-style: italic;
+    color: var(--color-text-dim);
   }
 
   .photographer__grid {
@@ -134,9 +402,50 @@ const photos = Object.entries(photoModules)
     margin-bottom: var(--space-3);
   }
 
-  .photographer__item :global(img) {
+  /* Film-frame thumbnail ---------------------------------------------------------- */
+
+  .photographer__thumb {
+    position: relative;
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: none;
+    background: none;
+    appearance: none;
+    cursor: pointer;
+  }
+
+  .photographer__thumb :global(img) {
+    display: block;
     width: 100%;
     height: auto;
+    transition: filter 200ms ease;
+  }
+
+  .photographer__thumb:hover :global(img) {
+    filter: brightness(1.08);
+  }
+
+  .photographer__perf {
+    display: block;
+    height: 8px;
+    background-color: var(--color-accent);
+    background-image: radial-gradient(circle, var(--color-bg) 0 2.4px, transparent 2.5px);
+    background-size: 12px 8px;
+    background-repeat: repeat-x;
+    background-position: center;
+  }
+
+  .photographer__frame-number {
+    position: absolute;
+    bottom: 14px;
+    right: 8px;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.04em;
+    color: var(--color-bg);
+    background: color-mix(in srgb, var(--color-accent) 88%, transparent);
+    padding: 0.1rem 0.35rem;
     border-radius: 2px;
   }
 
@@ -149,13 +458,6 @@ const photos = Object.entries(photoModules)
     text-transform: capitalize;
   }
 
-  .photographer__event {
-    display: block;
-    margin-top: 0.15rem;
-    font-size: 0.72rem;
-    color: var(--color-accent);
-  }
-
   .photographer__empty {
     color: var(--color-text-dim);
     font-family: var(--font-serif);
@@ -166,5 +468,160 @@ const photos = Object.entries(photoModules)
     font-family: var(--font-mono);
     font-style: normal;
     color: var(--color-accent);
+  }
+
+  /* Lightbox ---------------------------------------------------------------- */
+
+  .photographer__lightbox {
+    width: min(92vw, 1400px);
+    max-height: 92vh;
+    border: none;
+    padding: 0;
+    background: transparent;
+    overflow: visible;
+  }
+
+  .photographer__lightbox::backdrop {
+    background: color-mix(in srgb, var(--color-bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .photographer__lightbox[open] {
+      animation: photographer-lightbox-in 320ms ease;
+    }
+
+    .photographer__lightbox::backdrop {
+      animation: photographer-backdrop-in 320ms ease;
+    }
+  }
+
+  @keyframes photographer-lightbox-in {
+    from {
+      opacity: 0;
+      transform: scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes photographer-backdrop-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .photographer__lightbox-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .photographer__lightbox-close {
+    align-self: flex-end;
+    appearance: none;
+    border: none;
+    background: none;
+    color: var(--color-text-dim);
+    font-size: 1rem;
+    cursor: pointer;
+    padding: var(--space-1);
+  }
+
+  .photographer__lightbox-close:hover {
+    color: var(--color-accent);
+  }
+
+  .photographer__lightbox-stage {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .photographer__lightbox-frame {
+    display: flex;
+    flex-direction: column;
+    max-width: 100%;
+  }
+
+  .photographer__lightbox-frame .photographer__perf {
+    height: 10px;
+    background-size: 14px 10px;
+  }
+
+  .photographer__lightbox-img {
+    display: block;
+    max-width: 100%;
+    max-height: 70vh;
+    object-fit: contain;
+  }
+
+  .photographer__lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    appearance: none;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    border: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-bg) 70%, transparent);
+    color: var(--color-text);
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+      border-color 200ms ease,
+      color 200ms ease;
+  }
+
+  .photographer__lightbox-nav:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  .photographer__lightbox-nav--prev {
+    left: 0.5rem;
+  }
+
+  .photographer__lightbox-nav--next {
+    right: 0.5rem;
+  }
+
+  .photographer__lightbox-meta {
+    text-align: center;
+  }
+
+  .photographer__lightbox-caption {
+    font-family: var(--font-serif);
+    font-style: italic;
+    color: var(--color-text-dim);
+    font-size: 0.9rem;
+  }
+
+  .photographer__lightbox-info {
+    margin-top: 0.25rem;
+    display: flex;
+    justify-content: center;
+    gap: var(--space-2);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--color-accent);
+  }
+
+  .photographer__lightbox-gear {
+    color: var(--color-text-dim);
+  }
+
+  .photographer__lightbox-gear::before {
+    content: "· ";
   }
 </style>
