@@ -1,6 +1,4 @@
 ---
-import { execSync } from "node:child_process";
-
 interface Project {
   nickname: string;
   fullName: string;
@@ -14,19 +12,19 @@ interface Project {
   status?: "live" | "private" | "ongoing";
 }
 
-// TODO(filip): confirm copy + real links before launch.
 const projects: Project[] = [
   {
     nickname: "wagons",
-    fullName: "Fogarolli",
+    fullName: "Fogarolli — Wagon Inventory",
     slug: "wagons",
-    description: "Wagon inventory tracking tool used on iPads during live catering events.",
+    description:
+      "Inventory tracking tool used on iPads during live catering events, built for the company I work at.",
     highlights: [
       "Real-time inventory counts across catering wagons, synced through Supabase",
-      "Swedish-language UI built for on-the-ground staff at events",
-      "Deployed on Vercel, used directly on iPads during service",
+      "Swedish-language UI built for on-the-ground staff working at speed during service",
+      "In daily production use by my team at events",
     ],
-    stack: ["TypeScript", "React", "Vite", "Supabase"],
+    stack: ["TypeScript", "React", "Vite", "Supabase", "Vercel"],
     repoPrivate: true,
     status: "private",
   },
@@ -34,24 +32,40 @@ const projects: Project[] = [
     nickname: "shifts",
     fullName: "Fogarolli Schedule",
     slug: "shifts",
-    description: "Companion PWA for shift scheduling and availability, sharing the same Supabase backend.",
+    description:
+      "Companion shift-scheduling PWA for the same business, sharing one Supabase backend with the inventory app.",
     highlights: [
-      "Installable on employees' phones as a PWA",
-      "Admin creates shifts; staff mark availability and acknowledge assignments",
-      "Role-based access via Supabase auth and row-level security",
+      "Installable on employees' phones as a progressive web app",
+      "Admins create shifts; staff mark availability and acknowledge assignments",
+      "Role-based access enforced with Supabase auth and row-level security policies",
     ],
     stack: ["TypeScript", "React", "Vite", "Supabase", "PWA"],
     repoPrivate: true,
     status: "private",
   },
   {
+    nickname: "savings",
+    fullName: "Savings Tracker",
+    slug: "savings",
+    description:
+      "Cross-platform desktop app for tracking income and expenses, auto-allocating a share of income toward savings goals.",
+    highlights: [
+      "Rust and Tauri backend with local SQLite storage, schema applied via migrations on first launch",
+      "Dashboard with a monthly breakdown donut chart and a savings-rate trend line",
+      "Feature-sliced architecture so new features can be added without touching existing ones",
+    ],
+    stack: ["Rust", "Tauri", "TypeScript", "React", "SQLite"],
+    repoUrl: "https://github.com/FilipKlaic/Savings-tracker",
+    status: "ongoing",
+  },
+  {
     nickname: "kova",
     fullName: "Kova Studio",
     slug: "kova",
-    description: "Dev agency site with heavy motion work — case studies, animated transitions, brand system.",
+    description: "Site for my own development studio, built around scroll-driven motion and a custom brand system.",
     highlights: [
-      "Case studies built around scroll-driven motion sequences",
-      "Built as the site for my own dev agency",
+      "Case studies built around scroll-driven animation sequences",
+      "Custom design system and brand identity",
     ],
     stack: ["Next.js", "TypeScript", "Motion", "GSAP"],
     href: "https://kova-studio-bice.vercel.app/",
@@ -59,30 +73,17 @@ const projects: Project[] = [
     status: "live",
   },
   {
-    nickname: "savings",
-    fullName: "Savings Tracker",
-    slug: "savings",
-    description: "Cross-platform desktop app for tracking income/expenses and auto-allocating savings toward goals.",
-    highlights: [
-      "Tauri + Rust backend with SQLite storage via tauri-plugin-sql, migrations applied on first launch",
-      "Dashboard donut chart and savings-rate trend line built with Recharts",
-      "Feature-sliced structure — income, expenses, goals, settings, dashboard, and history each own their own api.ts",
-    ],
-    stack: ["Rust", "Tauri", "TypeScript", "React", "SQLite"],
-    repoUrl: "https://github.com/FilipKlaic/Savings-tracker",
-    status: "ongoing",
-  },
-  {
     nickname: "rice",
-    fullName: "Hyprland Rice",
+    fullName: "Linux Desktop Environment",
     slug: "rice",
-    description: "A fully themed Hyprland desktop with a dynamic color pipeline generated from the wallpaper.",
+    description:
+      "A fully themed Hyprland desktop on Arch Linux, with a colour pipeline that regenerates the whole system theme from the current wallpaper.",
     highlights: [
-      "matugen extracts a Material You palette from the current wallpaper and pushes it live to Waybar, Kitty, SwayNC, GTK, and Rofi",
-      "Custom Hyprland animation curves — spring-based window opens, overshoot workspace transitions",
-      "Hand-built GTK3 theme for Thunar, outside the matugen pipeline",
+      "Wallpaper changes trigger a Material You palette extraction that updates the bar, terminal, notifications, GTK apps, and launcher simultaneously",
+      "Custom window animation curves and a hand-built GTK3 theme",
+      "Shell scripting and config management across a dozen interlocking tools",
     ],
-    stack: ["Hyprland", "Lua", "Waybar", "GTK"],
+    stack: ["Linux", "Lua", "Shell", "GTK", "CSS"],
     status: "ongoing",
   },
 ];
@@ -93,982 +94,563 @@ const CONTACT = {
   linkedin: "https://www.linkedin.com/in/filip-klaic-6b2006308/",
 };
 
-interface GitStatus {
-  hash: string;
-  relativeTime: string;
-}
+const STACK_GROUPS = [
+  { label: "Languages", items: ["TypeScript", "C#", "JavaScript", "Python", "Java", "SQL"] },
+  { label: "Frontend", items: ["React", "Next.js", "Astro", "Vite", "HTML & CSS"] },
+  { label: "Backend & data", items: ["ASP.NET Core", "Supabase", "PostgreSQL", "SQLite", "Rust (Tauri)"] },
+  { label: "Tools & platforms", items: ["Git & GitHub", "Vercel", "Linux", "Figma"] },
+];
 
-function getGitStatus(): GitStatus {
-  try {
-    const hash = execSync("git rev-parse --short HEAD", { stdio: ["ignore", "pipe", "ignore"] }).toString().trim();
-    const relativeTime = execSync("git log -1 --format=%cr", { stdio: ["ignore", "pipe", "ignore"] })
-      .toString()
-      .trim();
-    return { hash, relativeTime };
-  } catch {
-    return { hash: "unknown", relativeTime: "unknown" };
-  }
-}
-
-const git = getGitStatus();
-
-const ARCH_ASCII = `      /\\
-     /  \\
-    /    \\
-   /      \\
-  /   ,,   \\
- /   |  |   \\
-/   :    :   \\
-/--'''    '''--\\`;
+const statusLabels: Record<string, string> = {
+  live: "Live",
+  private: "Private",
+  ongoing: "In progress",
+};
 ---
 
-<section data-panel="engineer" class="engineer">
-  <div class="engineer__crt" aria-hidden="true"></div>
-
-  <div class="engineer__frame">
-    <div class="engineer__win-bar engineer__win-bar--page">
-      <span class="engineer__win-dots engineer__win-dots--traffic" aria-hidden="true">
-        <span /><span /><span />
-      </span>
-      <span class="engineer__win-path">filip@portfolio: ~/dev</span>
-      <nav class="engineer__page-nav">
-        <a href="#projects">~/work</a>
-        <a href="#contact">~/contact</a>
+<section data-panel="engineer" class="dev">
+  <header class="dev__topbar">
+    <div class="dev__topbar-inner">
+      <span class="dev__brand">Filip Klaic</span>
+      <nav class="dev__nav">
+        <a href="#about">About</a>
+        <a href="#stack">Stack</a>
+        <a href="#work">Work</a>
+        <a href="#contact">Contact</a>
       </nav>
-      <span class="engineer__page-status">
-        <span class="engineer__status-dot" aria-hidden="true"></span>
-        available for work
-      </span>
     </div>
+  </header>
 
-    <header class="engineer__hero">
-      <p class="engineer__prompt">
-        <span class="engineer__prompt-user">filip</span><span class="engineer__prompt-sep">~/dev $</span> whoami --full
+  <div class="dev__wash" aria-hidden="true"></div>
+
+  <div class="dev__container">
+    <section class="dev__hero">
+      <p class="dev__availability">
+        <span class="dev__availability-dot" aria-hidden="true"></span>
+        Available for junior developer roles
       </p>
-      <h1 class="engineer__name">Filip Klaic<span class="engineer__cursor" aria-hidden="true">_</span></h1>
-      <p class="engineer__role"><span class="engineer__prompt-sep">&gt;</span> Software engineer &amp; systems dev, building tools people actually use</p>
-
-      <p class="engineer__prompt engineer__prompt--about">
-        <span class="engineer__prompt-sep">$</span> cat about.txt
+      <h1 class="dev__name">Filip Klaic</h1>
+      <p class="dev__role">Junior Software Developer</p>
+      <p class="dev__lead">
+        I build web and desktop applications that people actually use day to day — from inventory tools running on
+        iPads during live events to a cross-platform finance tracker. Currently studying Systemutvecklare .NET and
+        looking for my first full-time developer role.
       </p>
-      <p class="engineer__about">
-        I got into programming through Ehrensvärdska high school's Teknik, Info & Media program, where I first
-        learned C#, HTML, CSS, and JavaScript — and I'm currently studying at the college level as a Systemutvecklare
-        .NET, alongside picking up new languages and frameworks on my own time. What keeps me building is solving
-        problems for people I actually know — the wagon inventory app started as something I built for myself and
-        my coworkers at Fogarolli to make our own shifts easier, and it grew from there.
-      </p>
-
-      <ul class="engineer__meta">
-        <li>Sweden</li>
-        <li>Studying Systemutvecklare .NET</li>
-        <li>Available for freelance work</li>
-      </ul>
-
-      <div class="engineer__cta-row">
-        <a href="#projects" class="engineer__cta engineer__cta--solid">$ ls ~/projects -&gt;</a>
-        <a href="#contact" class="engineer__cta engineer__cta--ghost">./contact --hire</a>
-      </div>
-    </header>
-
-    <section class="engineer__identity">
-      <p class="engineer__prompt"><span class="engineer__prompt-sep">$</span> neofetch</p>
-      <div class="engineer__identity-card">
-        <pre class="engineer__avatar" aria-hidden="true">{ARCH_ASCII}</pre>
-        <div class="engineer__identity-info">
-          <p class="engineer__identity-title">filip@portfolio ----------</p>
-          <dl class="engineer__identity-list">
-            <div><dt>OS</dt><dd>Arch Linux (btw)</dd></div>
-            <div><dt>Role</dt><dd>Software Engineer / Systems Dev</dd></div>
-            <div><dt>Stack</dt><dd>TypeScript, React, C#, Supabase</dd></div>
-            <div><dt>Focus</dt><dd>Real tools for real people</dd></div>
-            <div>
-              <dt>Status</dt>
-              <dd class="engineer__identity-list-status">available</dd>
-            </div>
-          </dl>
-          <div class="engineer__swatches" aria-hidden="true">
-            <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-          </div>
-        </div>
+      <div class="dev__actions">
+        <a href="#work" class="dev__btn dev__btn--primary">View my work</a>
+        <a href={`mailto:${CONTACT.email}`} class="dev__btn dev__btn--secondary">Get in touch</a>
       </div>
     </section>
 
-    <section class="engineer__projects" id="projects">
-      <p class="engineer__prompt"><span class="engineer__prompt-sep">$</span> ls -la ~/projects</p>
-      <div class="engineer__section-label">&gt; selected work</div>
+    <section id="about" class="dev__section dev__reveal">
+      <h2 class="dev__section-title">About</h2>
+      <div class="dev__about">
+        <div class="dev__about-text">
+          <p>
+            I got into programming at Ehrensvärdska high school through the Teknik, Info &amp; Media program, where I
+            first learned C#, HTML, CSS, and JavaScript. I'm now studying at the college level as a Systemutvecklare
+            .NET, and I pick up new languages and frameworks on my own time alongside it.
+          </p>
+          <p>
+            What keeps me building is solving problems for people I actually know. The wagon inventory app started as
+            something I made for myself and my coworkers to make our shifts easier, and it grew into two production
+            apps the business now depends on.
+          </p>
+        </div>
+        <dl class="dev__facts">
+          <div class="dev__fact">
+            <dt>Location</dt>
+            <dd>Sweden</dd>
+          </div>
+          <div class="dev__fact">
+            <dt>Education</dt>
+            <dd>Systemutvecklare .NET (studying)</dd>
+          </div>
+          <div class="dev__fact">
+            <dt>Focus</dt>
+            <dd>Full-stack web &amp; desktop applications</dd>
+          </div>
+          <div class="dev__fact">
+            <dt>Looking for</dt>
+            <dd>Junior developer role</dd>
+          </div>
+        </dl>
+      </div>
+    </section>
 
-      <ul class="engineer__grid">
+    <section id="stack" class="dev__section dev__reveal">
+      <h2 class="dev__section-title">Tech stack</h2>
+      <div class="dev__stack-groups">
+        {
+          STACK_GROUPS.map((group) => (
+            <div class="dev__stack-group">
+              <h3 class="dev__stack-label">{group.label}</h3>
+              <ul class="dev__stack-list">
+                {group.items.map((item) => (
+                  <li>{item}</li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <section id="work" class="dev__section dev__reveal">
+      <h2 class="dev__section-title">Selected work</h2>
+      <ul class="dev__projects">
         {
           projects.map((project) => (
-            <li>
-              <button
-                type="button"
-                class="engineer__card"
-                aria-haspopup="dialog"
-                data-dialog-target={`dialog-${project.slug}`}
-              >
-                <span class="engineer__win-bar">
-                  <span class="engineer__win-dots" aria-hidden="true">
-                    <span /><span /><span />
+            <li class="dev__project dev__reveal">
+              <div class="dev__project-head">
+                <h3 class="dev__project-title">{project.fullName}</h3>
+                {project.status && (
+                  <span class="dev__badge" data-status={project.status}>
+                    {statusLabels[project.status]}
                   </span>
-                  <span class="engineer__win-path">~/projects/{project.nickname}</span>
-                </span>
-                <span class="engineer__card-body">
-                  <span class="engineer__card-top">
-                    <span class="engineer__card-name">{project.nickname}/</span>
-                    <span class="engineer__card-meta">
-                      {project.status && (
-                        <span class="engineer__status" data-status={project.status}>
-                          {project.status}
-                        </span>
-                      )}
-                      <span class="engineer__perms" aria-hidden="true">-rwxr-xr-x</span>
-                    </span>
-                  </span>
-                  <span class="engineer__card-desc">{project.description}</span>
-                  <span class="engineer__card-hint">more<span class="engineer__cursor" aria-hidden="true">_</span></span>
-                </span>
-              </button>
+                )}
+              </div>
+              <p class="dev__project-desc">{project.description}</p>
+              <ul class="dev__project-highlights">
+                {project.highlights.map((point) => (
+                  <li>{point}</li>
+                ))}
+              </ul>
+              <ul class="dev__tags">
+                {project.stack.map((tech) => (
+                  <li>{tech}</li>
+                ))}
+              </ul>
+              <div class="dev__project-links">
+                {project.href && (
+                  <a href={project.href} target="_blank" rel="noopener noreferrer">
+                    Visit site
+                  </a>
+                )}
+                {project.repoUrl && (
+                  <a href={project.repoUrl} target="_blank" rel="noopener noreferrer">
+                    View code
+                  </a>
+                )}
+                {project.repoPrivate && <span class="dev__project-note">Private repository</span>}
+              </div>
             </li>
           ))
         }
       </ul>
     </section>
 
-    <section class="engineer__contact" id="contact">
-      <p class="engineer__prompt"><span class="engineer__prompt-sep">$</span> ./contact --hire</p>
-      <div class="engineer__contact-panel">
-        <h2 class="engineer__contact-title">Let's build something together.</h2>
-        <p class="engineer__contact-sub">Open to freelance work, collabs, or just talking shop.</p>
-        <button type="button" class="engineer__mail-box" data-copy-email={CONTACT.email}>
-          <span class="engineer__prompt-sep">$</span> mail {CONTACT.email}<span class="engineer__cursor" aria-hidden="true">_</span>
-          <span class="engineer__copied-badge" aria-live="polite">copied!</span>
-        </button>
-        <div class="engineer__socials">
-          <a href={`mailto:${CONTACT.email}`} class="engineer__link">
-            email &#x2192;
-          </a>
-          <a href={CONTACT.github} class="engineer__link" target="_blank" rel="noopener noreferrer">
-            github &#x2192;
-          </a>
-          <a href={CONTACT.linkedin} class="engineer__link" target="_blank" rel="noopener noreferrer">
-            linkedin &#x2192;
-          </a>
-        </div>
+    <section id="contact" class="dev__section dev__reveal">
+      <h2 class="dev__section-title">Get in touch</h2>
+      <p class="dev__contact-lead">
+        I'm looking for a junior developer role and happy to talk about anything I've built here. The fastest way to
+        reach me is email.
+      </p>
+      <div class="dev__contact-links">
+        <a href={`mailto:${CONTACT.email}`} class="dev__btn dev__btn--primary">{CONTACT.email}</a>
+        <a href={CONTACT.github} class="dev__btn dev__btn--secondary" target="_blank" rel="noopener noreferrer">
+          GitHub
+        </a>
+        <a href={CONTACT.linkedin} class="dev__btn dev__btn--secondary" target="_blank" rel="noopener noreferrer">
+          LinkedIn
+        </a>
       </div>
     </section>
 
-    <footer class="engineer__shell-footer">
-      <p class="engineer__footer-echo">
-        <span class="engineer__prompt-sep">$</span> echo "(c) 2026 Filip Klaic, built in the terminal"<span
-          class="engineer__cursor"
-          aria-hidden="true">_</span>
-      </p>
-      <p class="engineer__footer-git">last commit: {git.relativeTime}, main@{git.hash}</p>
+    <footer class="dev__footer">
+      <p>&copy; 2026 Filip Klaic</p>
+      <p>Built with Astro</p>
     </footer>
   </div>
-
-  {
-    projects.map((project) => (
-      <dialog id={`dialog-${project.slug}`} class="engineer__dialog" aria-labelledby={`dialog-${project.slug}-title`}>
-        <div class="engineer__win-bar engineer__win-bar--dialog">
-          <span class="engineer__win-dots" aria-hidden="true">
-            <span /><span /><span />
-          </span>
-          <span class="engineer__win-path">~/projects/{project.slug}.sh</span>
-          <button type="button" class="engineer__dialog-close" data-dialog-close aria-label="Close">
-            &#x2715;
-          </button>
-        </div>
-        <div class="engineer__dialog-content">
-          <p class="engineer__prompt-mini">&gt; {project.nickname}</p>
-          <h2 id={`dialog-${project.slug}-title`} class="engineer__dialog-title">
-            {project.fullName}
-          </h2>
-          {project.status && (
-            <span class="engineer__status" data-status={project.status}>
-              {project.status}
-            </span>
-          )}
-          <p class="engineer__dialog-desc">{project.description}</p>
-          <ul class="engineer__highlights">
-            {project.highlights.map((point) => (
-              <li>{point}</li>
-            ))}
-          </ul>
-          <ul class="engineer__stack">
-            {project.stack.map((tech) => (
-              <li>{tech}</li>
-            ))}
-          </ul>
-          <div class="engineer__actions">
-            {project.href && (
-              <a href={project.href} class="engineer__link" target="_blank" rel="noopener noreferrer">
-                visit &#x2192;
-              </a>
-            )}
-            {project.repoUrl && (
-              <a href={project.repoUrl} class="engineer__link" target="_blank" rel="noopener noreferrer">
-                github &#x2192;
-              </a>
-            )}
-            {project.repoPrivate && (
-              <span class="engineer__link engineer__link--disabled" aria-disabled="true">
-                private repo
-              </span>
-            )}
-          </div>
-        </div>
-      </dialog>
-    ))
-  }
 </section>
 
 <script>
-  document.querySelectorAll<HTMLButtonElement>("[data-dialog-target]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const id = btn.dataset.dialogTarget;
-      const dialog = id ? document.getElementById(id) : null;
-      if (dialog instanceof HTMLDialogElement) dialog.showModal();
-    });
-  });
+  const revealTargets = Array.from(document.querySelectorAll<HTMLElement>(".dev__reveal"));
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  document.querySelectorAll<HTMLDialogElement>(".engineer__dialog").forEach((dialog) => {
-    dialog.querySelector("[data-dialog-close]")?.addEventListener("click", () => dialog.close());
-    dialog.addEventListener("click", (event) => {
-      if (event.target === dialog) dialog.close();
-    });
-  });
+  if (revealTargets.length > 0 && !reduceMotion && "IntersectionObserver" in window) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        });
+      },
+      { threshold: 0.1, rootMargin: "0px 0px -60px 0px" },
+    );
 
-  const copyBtn = document.querySelector<HTMLButtonElement>("[data-copy-email]");
-  copyBtn?.addEventListener("click", async () => {
-    const email = copyBtn.dataset.copyEmail;
-    if (!email) return;
-    try {
-      await navigator.clipboard.writeText(email);
-      copyBtn.dataset.copied = "true";
-      setTimeout(() => {
-        delete copyBtn.dataset.copied;
-      }, 1500);
-    } catch {
-      // Clipboard API unavailable — the mailto link in the socials row still works.
-    }
-  });
+    revealTargets.forEach((el) => {
+      // Only arm elements that start below the fold, so nothing visible flickers on load.
+      if (el.getBoundingClientRect().top < window.innerHeight * 0.9) return;
+      el.classList.add("dev__reveal--armed");
+      observer.observe(el);
+    });
+  }
 </script>
 
 <style>
-  .engineer {
-    --eng-dim: #1f6f85;
-    --eng-faint: #113244;
-    --eng-amber: #ffd24a;
-    --eng-glow: rgba(51, 225, 255, 0.45);
-    --eng-glow-soft: rgba(51, 225, 255, 0.18);
-    --eng-heading: #eaf6ff;
-
+  .dev {
     position: relative;
-    max-width: 68rem;
-    margin: 0 auto;
-    padding: var(--space-5) var(--space-3) var(--space-6);
-  }
-
-  .engineer__crt {
-    position: fixed;
-    inset: 0;
-    z-index: 5;
-    pointer-events: none;
-    mix-blend-mode: multiply;
-    background-image: repeating-linear-gradient(
-      to bottom,
-      transparent 0px,
-      transparent 2px,
-      rgba(0, 0, 0, 0.12) 3px,
-      transparent 4px
-    );
-  }
-
-  .engineer__frame {
-    position: relative;
-    border: 1px solid var(--eng-dim);
-    border-radius: 8px;
-    background: var(--color-bg);
-    box-shadow: 0 0 60px -30px var(--color-accent);
-    overflow: hidden;
-  }
-
-  .engineer__prompt {
-    color: var(--color-text-dim);
-    font-size: 0.9rem;
-    margin-bottom: var(--space-2);
-  }
-
-  .engineer__prompt-user {
-    color: var(--color-accent);
-  }
-
-  .engineer__prompt-sep {
-    color: var(--color-text-dim);
-    margin: 0 0.1rem;
-  }
-
-  .engineer__prompt--about {
-    margin-top: var(--space-4);
-    margin-bottom: 0;
-  }
-
-  .engineer__about {
-    margin-top: var(--space-1);
-    max-width: 38rem;
     color: var(--color-text);
-    font-size: 0.92rem;
-    line-height: 1.7;
   }
 
-  .engineer__section-label {
-    color: var(--color-text-dim);
-    font-size: 0.85rem;
-    margin-bottom: var(--space-2);
+  .dev__wash {
+    position: absolute;
+    top: -8rem;
+    left: -10%;
+    right: -10%;
+    height: 42rem;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(
+        42% 50% at 22% 26%,
+        color-mix(in srgb, var(--color-accent) 20%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        38% 46% at 82% 12%,
+        color-mix(in srgb, var(--color-accent-2) 18%, transparent),
+        transparent 70%
+      );
+    filter: blur(28px);
   }
 
-  .engineer__grid {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-    grid-auto-rows: 1fr;
-    gap: var(--space-2);
+  .dev__container {
+    position: relative;
+    z-index: 1;
   }
 
-  /* Page-level window bar --------------------------------------------------- */
+  /* Scroll reveal ---------------------------------------------------------- */
 
-  .engineer__win-bar--page {
-    padding: 0.6rem var(--space-3);
+  .dev__reveal--armed {
+    opacity: 0;
+    transform: translateY(16px);
   }
 
-  .engineer__win-dots--traffic span:nth-child(1) {
-    background: #ff5f56;
+  .dev__reveal--armed.is-visible {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 600ms ease,
+      transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  .engineer__win-dots--traffic span:nth-child(2) {
-    background: #ffbd2e;
+  .dev__container {
+    max-width: 56rem;
+    margin: 0 auto;
+    padding: 0 var(--space-3);
   }
 
-  .engineer__win-dots--traffic span:nth-child(3) {
-    background: #27c93f;
+  /* Top bar ------------------------------------------------------------- */
+
+  .dev__topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: color-mix(in srgb, var(--color-bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--color-border);
   }
 
-  .engineer__page-nav {
-    display: flex;
-    gap: var(--space-2);
-    margin-left: var(--space-2);
-  }
-
-  .engineer__page-nav a {
-    color: var(--color-text-dim);
-    font-size: 0.72rem;
-    text-decoration: none;
-  }
-
-  .engineer__page-nav a:hover {
-    color: var(--color-accent);
-  }
-
-  .engineer__page-status {
-    margin-left: auto;
+  .dev__topbar-inner {
+    max-width: 56rem;
+    margin: 0 auto;
+    padding: var(--space-2) var(--space-3);
     display: flex;
     align-items: center;
-    gap: 0.4rem;
-    font-size: 0.7rem;
-    color: var(--eng-amber);
-    flex-shrink: 0;
-    white-space: nowrap;
-  }
-
-  .engineer__status-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--eng-amber);
-    box-shadow: 0 0 8px var(--eng-amber);
-    animation: engineer-blink 1.4s steps(1) infinite;
-  }
-
-  /* Hero -------------------------------------------------------------------- */
-
-  .engineer__hero {
-    padding: var(--space-5) var(--space-4) var(--space-4);
-  }
-
-  .engineer__name {
-    font-size: clamp(2.5rem, 7vw, 4rem);
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    color: var(--eng-heading);
-    text-shadow:
-      0 0 8px var(--eng-glow),
-      0 0 24px var(--eng-glow-soft);
-  }
-
-  .engineer__role {
-    margin-top: var(--space-2);
-    color: var(--color-accent);
-    font-size: 1rem;
-    text-shadow: 0 0 6px var(--eng-glow-soft);
-  }
-
-  .engineer__meta {
-    list-style: none;
-    margin: var(--space-3) 0 0;
-    padding: 0;
-    display: flex;
-    flex-wrap: wrap;
+    justify-content: space-between;
     gap: var(--space-3);
-    font-size: 0.8rem;
+  }
+
+  .dev__brand {
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  .dev__nav {
+    display: flex;
+    gap: var(--space-3);
+  }
+
+  .dev__nav a {
+    color: var(--color-text-dim);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 150ms ease;
+  }
+
+  .dev__nav a:hover {
+    color: var(--color-text);
+  }
+
+  @media (max-width: 34rem) {
+    .dev__nav {
+      display: none;
+    }
+  }
+
+  /* Hero ---------------------------------------------------------------- */
+
+  .dev__hero {
+    padding: var(--space-6) 0 var(--space-5);
+  }
+
+  .dev__availability {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    color: var(--color-text-dim);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 0.3rem 0.8rem;
+  }
+
+  .dev__availability-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #3ecf8e;
+  }
+
+  .dev__name {
+    margin-top: var(--space-3);
+    font-size: clamp(2.25rem, 6vw, 3.25rem);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+  }
+
+  .dev__role {
+    margin-top: var(--space-1);
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--color-accent);
+  }
+
+  .dev__lead {
+    margin-top: var(--space-3);
+    max-width: 40rem;
+    font-size: 1.05rem;
     color: var(--color-text-dim);
   }
 
-  .engineer__meta li::before {
-    content: "[x] ";
-    color: var(--color-accent);
-  }
-
-  .engineer__cta-row {
+  .dev__actions {
     margin-top: var(--space-4);
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-2);
   }
 
-  .engineer__cta {
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
-    padding: 0.6rem 1rem;
-    border-radius: 4px;
+  .dev__btn {
+    display: inline-block;
+    padding: 0.65rem 1.25rem;
+    border-radius: 6px;
+    font-size: 0.92rem;
+    font-weight: 500;
     text-decoration: none;
-    border: 1px solid var(--color-accent);
-    transition: box-shadow var(--transition-duration) var(--transition-easing);
+    transition:
+      background 150ms ease,
+      border-color 150ms ease,
+      color 150ms ease;
   }
 
-  .engineer__cta--solid {
+  .dev__btn--primary {
     background: var(--color-accent);
-    color: var(--color-bg);
-    box-shadow: 0 0 20px -6px var(--color-accent);
+    color: #08111f;
+    border: 1px solid var(--color-accent);
   }
 
-  .engineer__cta--solid:hover {
-    box-shadow: 0 0 28px -4px var(--color-accent);
+  .dev__btn--primary:hover {
+    background: color-mix(in srgb, var(--color-accent) 85%, white);
   }
 
-  .engineer__cta--ghost {
+  .dev__btn--secondary {
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+  }
+
+  .dev__btn--secondary:hover {
+    border-color: var(--color-accent);
     color: var(--color-accent);
-    background: transparent;
   }
 
-  .engineer__cta--ghost:hover {
-    background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  /* Sections ------------------------------------------------------------ */
+
+  .dev__section {
+    padding: var(--space-5) 0;
+    border-top: 1px solid var(--color-border);
   }
 
-  /* Identity / neofetch ------------------------------------------------------ */
-
-  .engineer__identity {
-    padding: var(--space-4);
-    border-top: 1px solid var(--eng-faint);
+  .dev__section-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-dim);
+    margin-bottom: var(--space-3);
   }
 
-  .engineer__identity-card {
-    display: flex;
-    flex-wrap: wrap;
+  /* About --------------------------------------------------------------- */
+
+  .dev__about {
+    display: grid;
     gap: var(--space-4);
-    align-items: flex-start;
+    grid-template-columns: 1fr;
   }
 
-  .engineer__avatar {
-    flex-shrink: 0;
-    width: 14rem;
+  @media (min-width: 48rem) {
+    .dev__about {
+      grid-template-columns: 1.6fr 1fr;
+    }
+  }
+
+  .dev__about-text p + p {
+    margin-top: var(--space-2);
+  }
+
+  .dev__about-text p {
+    color: var(--color-text-dim);
+  }
+
+  .dev__facts {
     margin: 0;
-    font-size: 0.6rem;
-    line-height: 1.15;
-    color: var(--color-accent);
-    text-shadow: 0 0 6px var(--eng-glow-soft);
-    white-space: pre;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
   }
 
-  .engineer__identity-info {
-    flex: 1;
-    min-width: 16rem;
+  .dev__fact dt {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-dim);
   }
 
-  .engineer__identity-title {
-    color: var(--eng-heading);
-    font-size: 0.85rem;
-    margin-bottom: var(--space-2);
+  .dev__fact dd {
+    margin: 0.15rem 0 0;
+    font-size: 0.95rem;
   }
 
-  .engineer__identity-list {
+  /* Stack --------------------------------------------------------------- */
+
+  .dev__stack-groups {
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  }
+
+  .dev__stack-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: var(--space-1);
+  }
+
+  .dev__stack-list {
+    list-style: none;
     margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .dev__stack-list li {
+    font-size: 0.92rem;
+    color: var(--color-text-dim);
+  }
+
+  /* Projects ------------------------------------------------------------ */
+
+  .dev__projects {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .dev__project {
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    background: var(--color-bg-raised);
+    padding: var(--space-3);
+    transition:
+      border-color 200ms ease,
+      transform 200ms ease,
+      box-shadow 200ms ease,
+      background 200ms ease;
+  }
+
+  .dev__project:hover {
+    border-color: color-mix(in srgb, var(--color-accent) 50%, var(--color-border));
+    background: var(--color-bg-hover);
+    transform: translateY(-3px);
+    box-shadow:
+      0 12px 28px -18px rgba(0, 0, 0, 0.9),
+      0 0 32px -22px var(--color-accent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dev__project:hover {
+      transform: none;
+    }
+  }
+
+  .dev__project-head {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .dev__project-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .dev__badge {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    color: var(--color-text-dim);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 0.1rem 0.55rem;
+  }
+
+  .dev__badge[data-status="live"] {
+    color: #3ecf8e;
+    border-color: color-mix(in srgb, #3ecf8e 45%, transparent);
+  }
+
+  .dev__project-desc {
+    margin-top: var(--space-1);
+    color: var(--color-text-dim);
+    font-size: 0.95rem;
+  }
+
+  .dev__project-highlights {
+    margin: var(--space-2) 0 0;
+    padding-left: 1.15rem;
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
   }
 
-  .engineer__identity-list > div {
-    display: flex;
-    gap: var(--space-2);
-    font-size: 0.82rem;
-  }
-
-  .engineer__identity-list dt {
-    width: 4.5rem;
-    flex-shrink: 0;
-    color: var(--color-accent);
-  }
-
-  .engineer__identity-list dd {
-    margin: 0;
-    color: var(--color-text-dim);
-  }
-
-  .engineer__identity-list dd.engineer__identity-list-status {
-    color: var(--eng-amber);
-    text-shadow: 0 0 6px rgba(255, 210, 74, 0.4);
-  }
-
-  .engineer__swatches {
-    margin-top: var(--space-3);
-    display: flex;
-    gap: 4px;
-  }
-
-  .engineer__swatches span {
-    width: 14px;
-    height: 14px;
-    border-radius: 2px;
-  }
-
-  .engineer__swatches span:nth-child(1) {
-    background: var(--color-bg-raised);
-  }
-
-  .engineer__swatches span:nth-child(2) {
-    background: #ff5f56;
-  }
-
-  .engineer__swatches span:nth-child(3) {
-    background: #ffbd2e;
-  }
-
-  .engineer__swatches span:nth-child(4) {
-    background: #27c93f;
-  }
-
-  .engineer__swatches span:nth-child(5) {
-    background: var(--color-accent);
-  }
-
-  .engineer__swatches span:nth-child(6) {
-    background: var(--eng-dim);
-  }
-
-  .engineer__swatches span:nth-child(7) {
-    background: var(--eng-amber);
-  }
-
-  .engineer__swatches span:nth-child(8) {
-    background: var(--color-text);
-  }
-
-  /* Projects section --------------------------------------------------------- */
-
-  .engineer__projects {
-    padding: var(--space-4);
-    border-top: 1px solid var(--eng-faint);
-  }
-
-  /* Terminal window chrome, shared by cards + dialog ----------------------- */
-
-  .engineer__win-bar {
-    display: flex;
-    align-items: center;
-    gap: var(--space-1);
-    padding: 0.45rem 0.6rem;
-    background: color-mix(in srgb, var(--color-bg) 55%, var(--color-bg-raised) 45%);
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  .engineer__win-dots {
-    display: flex;
-    gap: 4px;
-    flex-shrink: 0;
-  }
-
-  .engineer__win-dots span {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--color-border);
-  }
-
-  .engineer__win-path {
-    font-size: 0.68rem;
-    color: var(--color-text-dim);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  /* Card -------------------------------------------------------------------- */
-
-  .engineer__card {
-    position: relative;
-    appearance: none;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    text-align: left;
-    border: 1px solid var(--color-border);
-    border-radius: 3px;
-    background: var(--color-bg-raised);
-    color: inherit;
-    font-family: var(--font-mono);
-    padding: 0;
-    overflow: hidden;
-    cursor: pointer;
-    transition:
-      border-color var(--transition-duration) var(--transition-easing),
-      box-shadow var(--transition-duration) var(--transition-easing);
-  }
-
-  .engineer__card::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    mix-blend-mode: overlay;
-    background-image: repeating-linear-gradient(
-      to bottom,
-      rgba(255, 255, 255, 0.03) 0px,
-      rgba(255, 255, 255, 0.03) 1px,
-      transparent 1px,
-      transparent 3px
-    );
-  }
-
-  .engineer__card:hover {
-    border-color: var(--color-accent);
-    box-shadow:
-      0 0 0 1px var(--color-accent),
-      0 0 28px -8px var(--color-accent);
-  }
-
-  .engineer__card-body {
-    position: relative;
-    z-index: 1;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-1);
-    padding: var(--space-3);
-  }
-
-  .engineer__card-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-1);
-  }
-
-  .engineer__card-name {
-    color: var(--color-accent);
-    font-weight: 500;
-  }
-
-  .engineer__card-meta {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-  }
-
-  .engineer__perms {
-    font-size: 0.62rem;
-    color: var(--color-text-dim);
-    opacity: 0.55;
-  }
-
-  .engineer__status {
-    font-size: 0.68rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--color-text-dim);
-    border: 1px solid var(--color-border);
-    border-radius: 4px;
-    padding: 0.1rem 0.4rem;
-  }
-
-  .engineer__status[data-status="live"] {
-    color: var(--color-accent);
-    border-color: var(--color-accent);
-  }
-
-  .engineer__card-desc {
-    color: var(--color-text-dim);
-    font-size: 0.85rem;
-    line-height: 1.5;
-  }
-
-  .engineer__card-hint {
-    margin-top: auto;
-    padding-top: var(--space-1);
-    color: var(--color-text-dim);
-    font-size: 0.72rem;
-  }
-
-  .engineer__cursor {
-    display: inline-block;
-    margin-left: 1px;
-    color: var(--color-accent);
-    animation: engineer-blink 1s steps(1) infinite;
-  }
-
-  @keyframes engineer-blink {
-    50% {
-      opacity: 0;
-    }
-  }
-
-  /* Contact ------------------------------------------------------------------ */
-
-  .engineer__contact {
-    padding: var(--space-4);
-    border-top: 1px solid var(--eng-faint);
-  }
-
-  .engineer__contact-panel {
-    padding: var(--space-4);
-    border-radius: 6px;
-    border: 1px solid var(--eng-faint);
-    background: radial-gradient(circle at top left, color-mix(in srgb, var(--color-accent) 8%, transparent), transparent 60%);
-  }
-
-  .engineer__contact-title {
-    color: var(--eng-heading);
-    font-size: 1.5rem;
-    font-weight: 700;
-    text-shadow: 0 0 8px var(--eng-glow-soft);
-  }
-
-  .engineer__contact-sub {
-    margin-top: var(--space-1);
-    color: var(--color-text-dim);
+  .dev__project-highlights li {
     font-size: 0.9rem;
-  }
-
-  .engineer__mail-box {
-    position: relative;
-    margin-top: var(--space-3);
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    appearance: none;
-    cursor: pointer;
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
-    color: var(--color-accent);
-    background: var(--color-bg);
-    border: 1px solid var(--eng-dim);
-    border-radius: 4px;
-    padding: 0.6rem 1rem;
-    box-shadow: 0 0 20px -8px var(--color-accent);
-    transition: border-color var(--transition-duration) var(--transition-easing);
-  }
-
-  .engineer__mail-box:hover {
-    border-color: var(--color-accent);
-  }
-
-  .engineer__copied-badge {
-    opacity: 0;
-    color: var(--eng-amber);
-    font-size: 0.72rem;
-    transition: opacity 200ms ease;
-  }
-
-  .engineer__mail-box[data-copied="true"] .engineer__copied-badge {
-    opacity: 1;
-  }
-
-  .engineer__socials {
-    margin-top: var(--space-3);
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-3);
-  }
-
-  /* Footer --------------------------------------------------------------- */
-
-  .engineer__shell-footer {
-    padding: var(--space-3) var(--space-4);
-    border-top: 1px solid var(--eng-faint);
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: var(--space-2);
-    font-size: 0.78rem;
     color: var(--color-text-dim);
   }
 
-  .engineer__footer-git {
-    color: var(--eng-dim);
-  }
-
-  /* Dialog ---------------------------------------------------------------- */
-
-  .engineer__dialog {
-    border: 1px solid var(--color-border);
-    border-radius: 3px;
-    background: var(--color-bg-raised);
-    color: var(--color-text);
-    padding: 0;
-    max-width: 30rem;
-    width: calc(100% - 2.5rem);
-    overflow: hidden;
-    box-shadow:
-      0 0 0 1px var(--color-accent),
-      0 0 60px -10px var(--color-accent);
-  }
-
-  .engineer__dialog::backdrop {
-    background: color-mix(in srgb, var(--color-bg) 75%, transparent);
-    backdrop-filter: blur(6px);
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .engineer__dialog[open] {
-      animation: engineer-dialog-in 460ms cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .engineer__dialog::backdrop {
-      animation: engineer-backdrop-in 460ms ease;
-    }
-  }
-
-  @keyframes engineer-dialog-in {
-    0% {
-      clip-path: inset(49.5% 50% 49.5% 50%);
-      box-shadow:
-        0 0 0 1px var(--color-accent),
-        0 0 0 0 transparent;
-    }
-    35% {
-      clip-path: inset(49.5% 0% 49.5% 0%);
-      box-shadow:
-        0 0 0 1px var(--color-accent),
-        0 0 12px -2px var(--color-accent);
-    }
-    100% {
-      clip-path: inset(0% 0% 0% 0%);
-      box-shadow:
-        0 0 0 1px var(--color-accent),
-        0 0 60px -10px var(--color-accent);
-    }
-  }
-
-  @keyframes engineer-backdrop-in {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
-  .engineer__win-bar--dialog .engineer__win-path {
-    flex: 1;
-  }
-
-  .engineer__dialog-close {
-    appearance: none;
-    border: none;
-    background: none;
-    color: var(--color-text-dim);
-    font-size: 0.85rem;
-    cursor: pointer;
-    line-height: 1;
-    flex-shrink: 0;
-  }
-
-  .engineer__dialog-close:hover {
+  .dev__project-highlights li::marker {
     color: var(--color-accent);
   }
 
-  .engineer__dialog-content {
-    position: relative;
-    padding: var(--space-3);
-  }
-
-  .engineer__dialog-content::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    mix-blend-mode: overlay;
-    background-image: repeating-linear-gradient(
-      to bottom,
-      rgba(255, 255, 255, 0.03) 0px,
-      rgba(255, 255, 255, 0.03) 1px,
-      transparent 1px,
-      transparent 3px
-    );
-  }
-
-  .engineer__prompt-mini {
-    position: relative;
-    z-index: 1;
-    color: var(--color-accent);
-    font-size: 0.8rem;
-  }
-
-  .engineer__dialog-title {
-    position: relative;
-    z-index: 1;
-    margin-top: 0.25rem;
-    font-size: 1.4rem;
-    font-weight: 700;
-  }
-
-  .engineer__dialog-desc {
-    position: relative;
-    z-index: 1;
-    margin-top: var(--space-2);
-    color: var(--color-text-dim);
-    font-size: 0.88rem;
-    line-height: 1.55;
-  }
-
-  .engineer__highlights {
-    position: relative;
-    z-index: 1;
-    margin: var(--space-2) 0 0;
-    padding-left: 1.1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-  }
-
-  .engineer__highlights li {
-    color: var(--color-text-dim);
-    font-size: 0.82rem;
-    line-height: 1.5;
-  }
-
-  .engineer__highlights li::marker {
-    color: var(--color-accent);
-  }
-
-  .engineer__stack {
-    position: relative;
-    z-index: 1;
+  .dev__tags {
     list-style: none;
     margin: var(--space-2) 0 0;
     padding: 0;
@@ -1077,40 +659,59 @@ const ARCH_ASCII = `      /\\
     gap: 0.4rem;
   }
 
-  .engineer__stack li {
+  .dev__tags li {
+    font-family: var(--font-mono);
     font-size: 0.72rem;
     color: var(--color-text-dim);
-    border: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-text) 6%, transparent);
     border-radius: 4px;
     padding: 0.2rem 0.5rem;
   }
 
-  .engineer__actions {
-    position: relative;
-    z-index: 1;
+  .dev__project-links {
     margin-top: var(--space-2);
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-3);
+    font-size: 0.9rem;
   }
 
-  .engineer__link {
-    display: inline-block;
+  .dev__project-links a {
     color: var(--color-accent);
-    font-size: 0.82rem;
     text-decoration: none;
   }
 
-  .engineer__link:hover {
+  .dev__project-links a:hover {
     text-decoration: underline;
   }
 
-  .engineer__link--disabled {
+  .dev__project-note {
     color: var(--color-text-dim);
-    cursor: not-allowed;
+    font-size: 0.85rem;
   }
 
-  .engineer__link--disabled:hover {
-    text-decoration: none;
+  /* Contact + footer ------------------------------------------------------ */
+
+  .dev__contact-lead {
+    max-width: 38rem;
+    color: var(--color-text-dim);
+  }
+
+  .dev__contact-links {
+    margin-top: var(--space-3);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .dev__footer {
+    padding: var(--space-4) 0 var(--space-5);
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-1);
+    font-size: 0.85rem;
+    color: var(--color-text-dim);
   }
 </style>

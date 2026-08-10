@@ -1,21 +1,25 @@
 /* Design tokens ------------------------------------------------------- */
 
 :root {
-  /* base surface */
-  --color-bg: #0b0c0f;
-  --color-bg-raised: #131519;
-  --color-border: #23262c;
+  /* base surface — lifted warm charcoal rather than flat near-black */
+  --color-bg: #121316;
+  --color-bg-raised: #1a1c21;
+  --color-bg-hover: #22252c;
+  --color-border: #2b2e36;
 
-  --color-text: #e8e6e1;
-  --color-text-dim: #8b8d94;
+  --color-text: #eeece8;
+  --color-text-dim: #9ba0a9;
 
   /* per-mode accents */
-  --color-accent-engineer: #33e1ff; /* electric phosphor blue */
-  --color-accent-photographer: #e0a458; /* warm amber, editorial */
+  --color-accent-engineer: #5b9cff; /* bright, friendly blue */
+  --color-accent-engineer-2: #8b6cff; /* violet, used for gradient washes */
+  --color-accent-photographer: #e8a94f; /* warm amber, editorial */
 
   /* active accent, swapped by ModeSwitcher via data-mode */
   --color-accent: var(--color-accent-engineer);
+  --color-accent-2: var(--color-accent-engineer-2);
 
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
   --font-serif: "Fraunces", Georgia, "Times New Roman", serif;
 
@@ -32,6 +36,7 @@
 
 :root[data-mode="photographer"] {
   --color-accent: var(--color-accent-photographer);
+  --color-accent-2: var(--color-accent-photographer);
 }
 
 /* Reset ----------------------------------------------------------------- */
@@ -51,8 +56,8 @@ body {
 body {
   background: var(--color-bg);
   color: var(--color-text);
-  font-family: var(--font-mono);
-  line-height: 1.5;
+  font-family: var(--font-sans);
+  line-height: 1.6;
   min-height: 100svh;
   transition:
     background var(--transition-duration) var(--transition-easing),
