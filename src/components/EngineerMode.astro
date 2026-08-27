@@ -1,4 +1,6 @@
 ---
+import { getImage } from "astro:assets";
+
 interface Project {
   nickname: string;
   fullName: string;
@@ -103,9 +105,9 @@ const projects: Project[] = [
     status: "live",
   },
   {
-    nickname: "rice",
-    fullName: "Linux Desktop Environment",
-    slug: "rice",
+    nickname: "nocture",
+    fullName: "Nocture",
+    slug: "nocture",
     description:
       "A fully themed Hyprland desktop on Arch Linux, with a colour pipeline that regenerates the whole system theme from the current wallpaper.",
     highlights: [
@@ -114,9 +116,46 @@ const projects: Project[] = [
       "Shell scripting and config management across a dozen interlocking tools",
     ],
     stack: ["Linux", "Lua", "Shell", "GTK", "CSS"],
+    repoUrl: "https://github.com/FilipKlaic/Nocture",
     status: "ongoing",
   },
 ];
+
+// Drop a screenshot in src/assets/screenshots named after a project's `slug`
+// (e.g. meridian.png) and it's picked up automatically — no code change needed.
+// For multiple screenshots on one project, add a numbered suffix: meridian-2.png,
+// meridian-3.png, etc. — they're sorted numerically after the unsuffixed one.
+const screenshotModules = import.meta.glob<{ default: ImageMetadata }>(
+  "/src/assets/screenshots/*.{jpeg,jpg,png,webp,avif}",
+  { eager: true },
+);
+
+function slugFromPath(path: string): string {
+  const filename = path.split("/").pop() ?? path;
+  return filename.replace(/\.[^.]+$/, "");
+}
+
+const screenshotsBySlug = new Map<string, { index: number; src: string }[]>();
+
+for (const [path, mod] of Object.entries(screenshotModules)) {
+  const name = slugFromPath(path);
+  const project = projects.find(
+    (p) => name === p.slug || new RegExp(`^${p.slug}[-_](\\d+)$`).test(name),
+  );
+  if (!project) continue;
+
+  const suffixMatch = name.match(/[-_](\d+)$/);
+  const index = suffixMatch ? Number(suffixMatch[1]) : 0;
+  const optimized = await getImage({ src: mod.default, width: 1600 });
+
+  const list = screenshotsBySlug.get(project.slug) ?? [];
+  list.push({ index, src: optimized.src });
+  screenshotsBySlug.set(project.slug, list);
+}
+
+for (const list of screenshotsBySlug.values()) {
+  list.sort((a, b) => a.index - b.index);
+}
 
 const CONTACT = {
   email: "file.klaic@gmail.com",
@@ -136,6 +175,22 @@ const statusLabels: Record<string, string> = {
   private: "Private",
   ongoing: "In progress",
 };
+
+const projectsForModal = projects.map((project) => ({
+  slug: project.slug,
+  fullName: project.fullName,
+  description: project.description,
+  highlights: project.highlights,
+  stack: project.stack,
+  href: project.href ?? null,
+  repoUrl: project.repoUrl ?? null,
+  repoPrivate: project.repoPrivate ?? false,
+  status: project.status ?? null,
+  images: (screenshotsBySlug.get(project.slug) ?? []).map((s) => s.src),
+}));
+
+// Escape "<" so a stray "</script>" inside project copy can't break out of this tag.
+const projectsForModalJson = JSON.stringify(projectsForModal).replace(/</g, "\\u003c");
 ---
 
 <section data-panel="engineer" class="dev">
@@ -231,7 +286,13 @@ const statusLabels: Record<string, string> = {
       <ul class="dev__projects">
         {
           projects.map((project) => (
-            <li class="dev__project dev__reveal">
+            <li
+              class="dev__project dev__reveal dev__project--clickable"
+              data-slug={project.slug}
+              role="button"
+              tabindex="0"
+              aria-haspopup="dialog"
+            >
               <div class="dev__project-head">
                 <h3 class="dev__project-title">{project.fullName}</h3>
                 {project.status && (
@@ -264,11 +325,14 @@ const statusLabels: Record<string, string> = {
                 )}
                 {project.repoPrivate && <span class="dev__project-note">Private repository</span>}
               </div>
+              <p class="dev__project-hint" aria-hidden="true">View details &rarr;</p>
             </li>
           ))
         }
       </ul>
     </section>
+
+    <script type="application/json" id="dev-projects-data" set:html={projectsForModalJson} />
 
     <section id="contact" class="dev__section dev__reveal">
       <h2 class="dev__section-title">Get in touch</h2>
@@ -291,6 +355,36 @@ const statusLabels: Record<string, string> = {
       <p>&copy; 2026 Filip Klaic</p>
       <p>Built with Astro</p>
     </footer>
+  </div>
+
+  <div class="dev__modal" id="project-modal" aria-hidden="true">
+    <div class="dev__modal-backdrop" data-close></div>
+    <div class="dev__modal-box" role="dialog" aria-modal="true" aria-labelledby="dev-modal-title">
+      <button type="button" class="dev__modal-close" data-close aria-label="Close">
+        &times;
+      </button>
+      <div class="dev__modal-info">
+        <div class="dev__modal-head">
+          <h3 id="dev-modal-title" class="dev__modal-title"></h3>
+          <span class="dev__badge dev__modal-badge" hidden></span>
+        </div>
+        <p class="dev__modal-desc"></p>
+        <ul class="dev__modal-highlights"></ul>
+        <ul class="dev__modal-tags"></ul>
+        <div class="dev__modal-links"></div>
+      </div>
+      <div class="dev__modal-media">
+        <button type="button" class="dev__modal-nav dev__modal-nav--prev" aria-label="Previous screenshot" hidden>
+          &larr;
+        </button>
+        <img class="dev__modal-img" alt="" hidden />
+        <p class="dev__modal-placeholder">Screenshot coming soon</p>
+        <button type="button" class="dev__modal-nav dev__modal-nav--next" aria-label="Next screenshot" hidden>
+          &rarr;
+        </button>
+        <span class="dev__modal-counter" hidden></span>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -317,6 +411,202 @@ const statusLabels: Record<string, string> = {
       observer.observe(el);
     });
   }
+</script>
+
+<script>
+  interface ModalProject {
+    slug: string;
+    fullName: string;
+    description: string;
+    highlights: string[];
+    stack: string[];
+    href: string | null;
+    repoUrl: string | null;
+    repoPrivate: boolean;
+    status: "live" | "private" | "ongoing" | null;
+    images: string[];
+  }
+
+  const statusLabels: Record<string, string> = {
+    live: "Live",
+    private: "Private",
+    ongoing: "In progress",
+  };
+
+  const dataEl = document.getElementById("dev-projects-data");
+  const projectsData: ModalProject[] = dataEl?.textContent ? JSON.parse(dataEl.textContent) : [];
+
+  const modal = document.getElementById("project-modal");
+  const modalTitle = modal?.querySelector<HTMLElement>(".dev__modal-title");
+  const modalBadge = modal?.querySelector<HTMLElement>(".dev__modal-badge");
+  const modalDesc = modal?.querySelector<HTMLElement>(".dev__modal-desc");
+  const modalHighlights = modal?.querySelector<HTMLElement>(".dev__modal-highlights");
+  const modalTags = modal?.querySelector<HTMLElement>(".dev__modal-tags");
+  const modalLinks = modal?.querySelector<HTMLElement>(".dev__modal-links");
+  const modalImg = modal?.querySelector<HTMLImageElement>(".dev__modal-img");
+  const modalPlaceholder = modal?.querySelector<HTMLElement>(".dev__modal-placeholder");
+  const modalClose = modal?.querySelector<HTMLElement>(".dev__modal-close");
+  const modalNavPrev = modal?.querySelector<HTMLButtonElement>(".dev__modal-nav--prev");
+  const modalNavNext = modal?.querySelector<HTMLButtonElement>(".dev__modal-nav--next");
+  const modalCounter = modal?.querySelector<HTMLElement>(".dev__modal-counter");
+
+  let lastFocused: HTMLElement | null = null;
+  let currentProject: ModalProject | null = null;
+  let currentImageIndex = 0;
+
+  function renderImage() {
+    const images = currentProject?.images ?? [];
+    const hasImages = images.length > 0;
+
+    if (modalImg && modalPlaceholder) {
+      if (hasImages) {
+        modalImg.src = images[currentImageIndex];
+        modalImg.alt = currentProject ? `${currentProject.fullName} screenshot ${currentImageIndex + 1}` : "";
+        modalImg.hidden = false;
+        modalPlaceholder.hidden = true;
+      } else {
+        modalImg.hidden = true;
+        modalImg.removeAttribute("src");
+        modalPlaceholder.hidden = false;
+      }
+    }
+
+    const showNav = images.length > 1;
+    if (modalNavPrev) modalNavPrev.hidden = !showNav;
+    if (modalNavNext) modalNavNext.hidden = !showNav;
+    if (modalCounter) {
+      modalCounter.hidden = !showNav;
+      modalCounter.textContent = `${currentImageIndex + 1} / ${images.length}`;
+    }
+  }
+
+  function showPrevImage() {
+    const len = currentProject?.images.length ?? 0;
+    if (len < 2) return;
+    currentImageIndex = (currentImageIndex - 1 + len) % len;
+    renderImage();
+  }
+
+  function showNextImage() {
+    const len = currentProject?.images.length ?? 0;
+    if (len < 2) return;
+    currentImageIndex = (currentImageIndex + 1) % len;
+    renderImage();
+  }
+
+  function openModal(slug: string | undefined) {
+    if (!slug || !modal) return;
+    const project = projectsData.find((p) => p.slug === slug);
+    if (!project) return;
+
+    if (modalTitle) modalTitle.textContent = project.fullName;
+
+    if (modalBadge) {
+      if (project.status) {
+        modalBadge.textContent = statusLabels[project.status] ?? project.status;
+        modalBadge.dataset.status = project.status;
+        modalBadge.hidden = false;
+      } else {
+        modalBadge.hidden = true;
+      }
+    }
+
+    if (modalDesc) modalDesc.textContent = project.description;
+
+    if (modalHighlights) {
+      modalHighlights.replaceChildren(
+        ...project.highlights.map((point) => {
+          const li = document.createElement("li");
+          li.textContent = point;
+          return li;
+        }),
+      );
+    }
+
+    if (modalTags) {
+      modalTags.replaceChildren(
+        ...project.stack.map((tech) => {
+          const li = document.createElement("li");
+          li.textContent = tech;
+          return li;
+        }),
+      );
+    }
+
+    if (modalLinks) {
+      const links: HTMLElement[] = [];
+      if (project.href) {
+        const a = document.createElement("a");
+        a.href = project.href;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        a.textContent = "Visit site";
+        links.push(a);
+      }
+      if (project.repoUrl) {
+        const a = document.createElement("a");
+        a.href = project.repoUrl;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        a.textContent = "View code";
+        links.push(a);
+      }
+      if (project.repoPrivate) {
+        const span = document.createElement("span");
+        span.className = "dev__project-note";
+        span.textContent = "Private repository";
+        links.push(span);
+      }
+      modalLinks.replaceChildren(...links);
+    }
+
+    currentProject = project;
+    currentImageIndex = 0;
+    renderImage();
+
+    lastFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    modal.setAttribute("aria-hidden", "false");
+    document.body.classList.add("dev__modal-open");
+    modalClose?.focus();
+  }
+
+  function closeModal() {
+    if (!modal) return;
+    modal.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("dev__modal-open");
+    lastFocused?.focus();
+  }
+
+  function isInsideLinks(target: EventTarget | null): boolean {
+    return target instanceof HTMLElement && target.closest(".dev__project-links") !== null;
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-slug]").forEach((card) => {
+    card.addEventListener("click", (event) => {
+      if (isInsideLinks(event.target)) return;
+      openModal(card.dataset.slug);
+    });
+    card.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      if (isInsideLinks(event.target)) return;
+      event.preventDefault();
+      openModal(card.dataset.slug);
+    });
+  });
+
+  modal?.querySelectorAll<HTMLElement>("[data-close]").forEach((el) => {
+    el.addEventListener("click", closeModal);
+  });
+
+  modalNavPrev?.addEventListener("click", showPrevImage);
+  modalNavNext?.addEventListener("click", showNextImage);
+
+  document.addEventListener("keydown", (event) => {
+    if (modal?.getAttribute("aria-hidden") !== "false") return;
+    if (event.key === "Escape") closeModal();
+    if (event.key === "ArrowLeft") showPrevImage();
+    if (event.key === "ArrowRight") showNextImage();
+  });
 </script>
 
 <style>
@@ -715,9 +1005,264 @@ const statusLabels: Record<string, string> = {
     text-decoration: underline;
   }
 
-  .dev__project-note {
+  /* Unscoped: also used for a <span> the modal script creates dynamically. */
+  :global(.dev__project-note) {
     color: var(--color-text-dim);
     font-size: 0.85rem;
+  }
+
+  .dev__project--clickable {
+    cursor: pointer;
+  }
+
+  .dev__project--clickable:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+
+  .dev__project-hint {
+    margin: var(--space-2) 0 0;
+    font-size: 0.82rem;
+    color: var(--color-accent);
+    text-align: right;
+  }
+
+  /* Project modal --------------------------------------------------------- */
+
+  .dev__modal {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-4);
+  }
+
+  .dev__modal[aria-hidden="true"] {
+    display: none;
+  }
+
+  .dev__modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: color-mix(in srgb, black 70%, transparent);
+    backdrop-filter: blur(4px);
+  }
+
+  .dev__modal-box {
+    position: relative;
+    z-index: 1;
+    width: min(68rem, 100%);
+    height: min(40rem, 88vh);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: var(--color-bg-raised);
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow:
+      0 40px 90px -30px rgba(0, 0, 0, 0.85),
+      0 0 60px -30px var(--color-accent);
+  }
+
+  .dev__modal-close {
+    position: absolute;
+    top: var(--space-2);
+    right: var(--space-2);
+    z-index: 2;
+    width: 2rem;
+    height: 2rem;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-raised);
+    color: var(--color-text);
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+    transition:
+      border-color 150ms ease,
+      color 150ms ease;
+  }
+
+  .dev__modal-close:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  .dev__modal-info {
+    padding: var(--space-4);
+    overflow-y: auto;
+    border-right: 1px solid var(--color-border);
+  }
+
+  .dev__modal-head {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .dev__modal-title {
+    font-size: 1.35rem;
+    font-weight: 600;
+  }
+
+  .dev__modal-desc {
+    margin-top: var(--space-2);
+    color: var(--color-text-dim);
+  }
+
+  .dev__modal-highlights {
+    margin: var(--space-3) 0 0;
+    padding-left: 1.15rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  /* These three rules target <li>/<a>/<span> nodes the modal script creates at
+     runtime with document.createElement, which never receive Astro's scoped
+     data-astro-cid attribute — so the selectors must stay unscoped to match them. */
+  :global(.dev__modal-highlights li) {
+    font-size: 0.92rem;
+    color: var(--color-text-dim);
+  }
+
+  :global(.dev__modal-highlights li::marker) {
+    color: var(--color-accent);
+  }
+
+  .dev__modal-tags {
+    list-style: none;
+    margin: var(--space-3) 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  :global(.dev__modal-tags li) {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--color-text-dim);
+    background: color-mix(in srgb, var(--color-text) 6%, transparent);
+    border-radius: 4px;
+    padding: 0.2rem 0.5rem;
+  }
+
+  .dev__modal-links {
+    margin-top: var(--space-3);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+    font-size: 0.9rem;
+  }
+
+  :global(.dev__modal-links a) {
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+
+  :global(.dev__modal-links a:hover) {
+    text-decoration: underline;
+  }
+
+  .dev__modal-media {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-3);
+    background: color-mix(in srgb, var(--color-text) 4%, var(--color-bg));
+  }
+
+  .dev__modal-img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 12px 30px -16px rgba(0, 0, 0, 0.6);
+  }
+
+  .dev__modal-placeholder {
+    color: var(--color-text-dim);
+    font-size: 0.9rem;
+  }
+
+  .dev__modal-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    width: 2.25rem;
+    height: 2.25rem;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-bg-raised) 85%, transparent);
+    color: var(--color-text);
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+    transition:
+      border-color 150ms ease,
+      color 150ms ease;
+  }
+
+  .dev__modal-nav:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  .dev__modal-nav--prev {
+    left: var(--space-2);
+  }
+
+  .dev__modal-nav--next {
+    right: var(--space-2);
+  }
+
+  .dev__modal-counter {
+    position: absolute;
+    bottom: var(--space-2);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    font-size: 0.78rem;
+    color: var(--color-text-dim);
+    background: color-mix(in srgb, var(--color-bg-raised) 85%, transparent);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 0.15rem 0.6rem;
+    backdrop-filter: blur(4px);
+  }
+
+  @media (max-width: 44rem) {
+    .dev__modal-box {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto;
+      height: min(86vh, 100%);
+      overflow-y: auto;
+    }
+
+    .dev__modal-info {
+      border-right: none;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .dev__modal-media {
+      min-height: 14rem;
+    }
+  }
+
+  :global(body.dev__modal-open) {
+    overflow: hidden;
   }
 
   /* Contact + footer ------------------------------------------------------ */
