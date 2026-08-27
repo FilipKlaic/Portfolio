@@ -59,6 +59,36 @@ const projects: Project[] = [
     status: "ongoing",
   },
   {
+    nickname: "meridian",
+    fullName: "Meridian",
+    slug: "meridian",
+    description:
+      "Desktop tool that visualizes a TypeScript project's architecture by mapping file imports and function call chains.",
+    highlights: [
+      "Rust backend using tree-sitter to parse imports, re-exports, requires, and TypeScript path aliases",
+      "Interactive import and call graphs built with React Flow, color-coded by directory with a focus mode to isolate related code",
+      "Scan results cached in SQLite so reopening a project is fast, with freshness tracked against file modification times",
+    ],
+    stack: ["Rust", "Tauri", "React", "TypeScript", "tree-sitter", "SQLite"],
+    repoUrl: "https://github.com/FilipKlaic/Meridian",
+    status: "ongoing",
+  },
+  {
+    nickname: "atrium",
+    fullName: "Atrium",
+    slug: "atrium",
+    description:
+      "Cross-platform chat app built as a Slack/Discord alternative, with a native desktop client and a real-time backend.",
+    highlights: [
+      "Tauri desktop client for macOS and Windows with servers, channels, and role-based membership",
+      "Real-time messaging over WebSockets with presence, typing indicators, and cursor-based pagination",
+      "Fastify and PostgreSQL backend with Drizzle ORM, JWT auth using Argon2 hashing and rotating refresh tokens",
+    ],
+    stack: ["Rust", "Tauri", "React", "TypeScript", "Fastify", "PostgreSQL", "Drizzle"],
+    repoUrl: "https://github.com/FilipKlaic/Atrium",
+    status: "ongoing",
+  },
+  {
     nickname: "kova",
     fullName: "Kova Studio",
     slug: "kova",
