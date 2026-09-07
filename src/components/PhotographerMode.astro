@@ -12,7 +12,18 @@ const DEFAULT_EVENT: EventInfo = { location: "Ring Knutstorp", date: "26 Jul 202
 
 // TODO(filip): once Norra Åsum photos are dropped in, key their filenames (no extension) here,
 // e.g. "kart-01": { location: "Norra Åsum", date: "2 Aug 2026", dateSort: "2026-08-02" }.
-const EVENT_OVERRIDES: Record<string, EventInfo> = {};
+const LANDSKRONA_MEET: EventInfo = { location: "Landskrona", date: "15–16 Aug 2026", dateSort: "2026-08-16" };
+
+const EVENT_OVERRIDES: Record<string, EventInfo> = {
+  "amg-gt-low-angle": LANDSKRONA_MEET,
+  "e30-m3-profile": LANDSKRONA_MEET,
+  "bmw-badge": LANDSKRONA_MEET,
+  "gt3-cockpit": LANDSKRONA_MEET,
+  "supra-dusk": LANDSKRONA_MEET,
+  "supra-window-detail": LANDSKRONA_MEET,
+  "wet-wheel-detail": LANDSKRONA_MEET,
+  "rider-portrait": LANDSKRONA_MEET,
+};
 
 const photoModules = import.meta.glob<{ default: ImageMetadata }>(
   "/src/assets/photos/*.{jpeg,jpg,png,webp,avif}",
