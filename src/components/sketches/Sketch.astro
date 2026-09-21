@@ -1,0 +1,35 @@
+---
+// Base for the hand-drawn sketches: ink line work, round joins and the shared
+// #sketch wobble filter. Colour washes inside set stroke="none" and are usually
+// nudged off the outline, like a print slightly out of register. Shapes that
+// hide what's behind them fill with var(--sketch-paper), which defaults to the
+// page background; set it on a container to match another surface.
+interface Props {
+  viewBox: string;
+}
+
+const { viewBox } = Astro.props;
+---
+
+<svg viewBox={viewBox} class="sketch" aria-hidden="true" focusable="false">
+  <g
+    filter="url(#sketch)"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2.2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <slot />
+  </g>
+</svg>
+
+<style>
+  .sketch {
+    display: block;
+    width: 100%;
+    height: auto;
+    color: var(--color-text);
+    --paper: var(--sketch-paper, var(--color-bg));
+  }
+</style>

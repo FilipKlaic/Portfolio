@@ -1,0 +1,18 @@
+---
+// An envelope with a letter sliding out.
+import Sketch from "./Sketch.astro";
+---
+
+<Sketch viewBox="0 0 200 150">
+  <rect x="30" y="62" width="130" height="78" rx="6" transform="translate(6 7)" fill="var(--fill-ochre)" stroke="none"></rect>
+  <rect x="44" y="20" width="102" height="80" rx="4" fill="var(--paper)"></rect>
+  <path d="M58 38 H118" stroke-width="2.4"></path>
+  <path d="M58 50 H132 M58 60 H112" stroke-width="1.6"></path>
+  <rect x="30" y="62" width="130" height="78" rx="6" fill="var(--paper)" stroke="none"></rect>
+  <rect x="30" y="62" width="130" height="78" rx="6"></rect>
+  <path d="M30 138 L95 96 L160 138"></path>
+  <path d="M32 64 L78 100 M158 64 L112 100" stroke-width="1.8"></path>
+
+  <path d="M172 34 l12 -6 M174 48 h14 M172 62 l12 6" stroke-width="2"></path>
+  <path d="M20 28 v12 M14 34 h12" stroke="var(--color-accent)" stroke-width="2"></path>
+</Sketch>

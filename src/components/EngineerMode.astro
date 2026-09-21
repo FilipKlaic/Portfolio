@@ -1,5 +1,7 @@
 ---
 import { getImage } from "astro:assets";
+import DeskSketch from "./sketches/DeskSketch.astro";
+import LetterSketch from "./sketches/LetterSketch.astro";
 
 interface Project {
   nickname: string;
@@ -92,14 +94,16 @@ const projects: Project[] = [
   },
   {
     nickname: "kova",
-    fullName: "Kova Studio",
+    fullName: "Kova",
     slug: "kova",
-    description: "Site for my own development studio, built around scroll-driven motion and a custom brand system.",
+    description:
+      "Site for Kova, my design and engineering consultancy, with a warm editorial design and hand-drawn illustrations.",
     highlights: [
-      "Case studies built around scroll-driven animation sequences",
-      "Custom design system and brand identity",
+      "Hand-drawn SVG illustrations that share one sketch filter for a consistent ink feel",
+      "Small design system: paper palette, serif headlines and a single accent colour",
+      "Project details in native dialogs, with no animation libraries",
     ],
-    stack: ["Next.js", "TypeScript", "Motion", "GSAP"],
+    stack: ["Next.js", "TypeScript", "Tailwind CSS", "SVG"],
     href: "https://kova-studio-bice.vercel.app/",
     repoUrl: "https://github.com/FilipKlaic/Kova-Studio",
     status: "live",
@@ -194,42 +198,36 @@ const projectsForModalJson = JSON.stringify(projectsForModal).replace(/</g, "\\u
 ---
 
 <section data-panel="engineer" class="dev">
-  <header class="dev__topbar">
-    <div class="dev__topbar-inner">
-      <span class="dev__brand">Filip Klaic</span>
-      <nav class="dev__nav">
-        <a href="#about">About</a>
-        <a href="#stack">Stack</a>
-        <a href="#work">Work</a>
-        <a href="#contact">Contact</a>
-      </nav>
-    </div>
-  </header>
-
-  <div class="dev__wash" aria-hidden="true"></div>
-
-  <div class="dev__container">
+  <div class="container">
     <section class="dev__hero">
-      <p class="dev__availability">
-        <span class="dev__availability-dot" aria-hidden="true"></span>
-        Available for junior developer roles
-      </p>
-      <h1 class="dev__name">Filip Klaic</h1>
-      <p class="dev__role">Junior Software Developer</p>
-      <p class="dev__lead">
-        I build web and desktop applications that people actually use day to day — from inventory tools running on
-        iPads during live events to a cross-platform finance tracker. Currently studying Systemutvecklare .NET and
-        looking for my first full-time developer role.
-      </p>
-      <div class="dev__actions">
-        <a href="#work" class="dev__btn dev__btn--primary">View my work</a>
-        <a href={`mailto:${CONTACT.email}`} class="dev__btn dev__btn--secondary">Get in touch</a>
+      <div class="dev__hero-text">
+        <p class="dev__availability">
+          <span class="dev__availability-dot" aria-hidden="true"></span>
+          Available for junior developer roles
+        </p>
+        <h1 class="dev__name">Filip Klaic</h1>
+        <p class="dev__role">Junior software developer</p>
+        <p class="dev__lead">
+          I build web and desktop applications that people actually use day to day — from inventory tools running on
+          iPads during live events to a cross-platform finance tracker. Currently studying Systemutvecklare .NET and
+          looking for my first full-time developer role.
+        </p>
+        <div class="dev__actions">
+          <a href="#work" class="btn">View my work</a>
+          <a href={`mailto:${CONTACT.email}`} class="link">Get in touch</a>
+        </div>
+      </div>
+      <div class="dev__hero-art">
+        <DeskSketch />
       </div>
     </section>
 
-    <section id="about" class="dev__section dev__reveal">
-      <h2 class="dev__section-title">About</h2>
-      <div class="dev__about">
+    <section id="about" class="dev__section dev__split">
+      <div>
+        <p class="eyebrow">About</p>
+        <h2 class="dev__section-title">A bit about <em>me.</em></h2>
+      </div>
+      <div>
         <div class="dev__about-text">
           <p>
             I got into programming at Ehrensvärdska high school through the Teknik, Info &amp; Media program, where I
@@ -243,19 +241,19 @@ const projectsForModalJson = JSON.stringify(projectsForModal).replace(/</g, "\\u
           </p>
         </div>
         <dl class="dev__facts">
-          <div class="dev__fact">
+          <div>
             <dt>Location</dt>
             <dd>Sweden</dd>
           </div>
-          <div class="dev__fact">
+          <div>
             <dt>Education</dt>
             <dd>Systemutvecklare .NET (studying)</dd>
           </div>
-          <div class="dev__fact">
+          <div>
             <dt>Focus</dt>
             <dd>Full-stack web &amp; desktop applications</dd>
           </div>
-          <div class="dev__fact">
+          <div>
             <dt>Looking for</dt>
             <dd>Junior developer role</dd>
           </div>
@@ -263,12 +261,13 @@ const projectsForModalJson = JSON.stringify(projectsForModal).replace(/</g, "\\u
       </div>
     </section>
 
-    <section id="stack" class="dev__section dev__reveal">
-      <h2 class="dev__section-title">Tech stack</h2>
-      <div class="dev__stack-groups">
+    <section id="stack" class="dev__section">
+      <p class="eyebrow">Tech stack</p>
+      <h2 class="dev__section-title">Tools I <em>work with.</em></h2>
+      <div class="dev__stack">
         {
           STACK_GROUPS.map((group) => (
-            <div class="dev__stack-group">
+            <div class="dev__card dev__stack-group">
               <h3 class="dev__stack-label">{group.label}</h3>
               <ul class="dev__stack-list">
                 {group.items.map((item) => (
@@ -281,51 +280,39 @@ const projectsForModalJson = JSON.stringify(projectsForModal).replace(/</g, "\\u
       </div>
     </section>
 
-    <section id="work" class="dev__section dev__reveal">
-      <h2 class="dev__section-title">Selected work</h2>
+    <section id="work" class="dev__section">
+      <p class="eyebrow">Selected work</p>
+      <h2 class="dev__section-title">Things I've <em>built.</em></h2>
       <ul class="dev__projects">
         {
           projects.map((project) => (
-            <li
-              class="dev__project dev__reveal dev__project--clickable"
-              data-slug={project.slug}
-              role="button"
-              tabindex="0"
-              aria-haspopup="dialog"
-            >
-              <div class="dev__project-head">
-                <h3 class="dev__project-title">{project.fullName}</h3>
-                {project.status && (
-                  <span class="dev__badge" data-status={project.status}>
-                    {statusLabels[project.status]}
-                  </span>
-                )}
-              </div>
+            <li class="dev__card dev__project">
+              {project.status && (
+                <span class="dev__badge" data-status={project.status}>
+                  {statusLabels[project.status]}
+                </span>
+              )}
+              <h3 class="dev__project-title">
+                <button type="button" class="dev__project-open" data-slug={project.slug} aria-haspopup="dialog">
+                  {project.fullName}
+                </button>
+              </h3>
               <p class="dev__project-desc">{project.description}</p>
-              <ul class="dev__project-highlights">
-                {project.highlights.map((point) => (
-                  <li>{point}</li>
-                ))}
-              </ul>
-              <ul class="dev__tags">
-                {project.stack.map((tech) => (
-                  <li>{tech}</li>
-                ))}
-              </ul>
+              <p class="dev__project-stack">{project.stack.join(" · ")}</p>
               <div class="dev__project-links">
+                <span class="dev__project-more">Read more</span>
                 {project.href && (
                   <a href={project.href} target="_blank" rel="noopener noreferrer">
-                    Visit site
+                    Visit site ↗
                   </a>
                 )}
                 {project.repoUrl && (
                   <a href={project.repoUrl} target="_blank" rel="noopener noreferrer">
-                    View code
+                    View code ↗
                   </a>
                 )}
                 {project.repoPrivate && <span class="dev__project-note">Private repository</span>}
               </div>
-              <p class="dev__project-hint" aria-hidden="true">View details &rarr;</p>
             </li>
           ))
         }
@@ -334,20 +321,24 @@ const projectsForModalJson = JSON.stringify(projectsForModal).replace(/</g, "\\u
 
     <script type="application/json" id="dev-projects-data" set:html={projectsForModalJson} />
 
-    <section id="contact" class="dev__section dev__reveal">
-      <h2 class="dev__section-title">Get in touch</h2>
-      <p class="dev__contact-lead">
-        I'm looking for a junior developer role and happy to talk about anything I've built here. The fastest way to
-        reach me is email.
-      </p>
-      <div class="dev__contact-links">
-        <a href={`mailto:${CONTACT.email}`} class="dev__btn dev__btn--primary">{CONTACT.email}</a>
-        <a href={CONTACT.github} class="dev__btn dev__btn--secondary" target="_blank" rel="noopener noreferrer">
-          GitHub
-        </a>
-        <a href={CONTACT.linkedin} class="dev__btn dev__btn--secondary" target="_blank" rel="noopener noreferrer">
-          LinkedIn
-        </a>
+    <section id="contact" class="dev__section">
+      <div class="dev__card dev__contact">
+        <div>
+          <p class="eyebrow">Contact</p>
+          <h2 class="dev__section-title">Get in <em>touch.</em></h2>
+          <p class="dev__contact-lead">
+            I'm looking for a junior developer role and happy to talk about anything I've built here. The fastest way
+            to reach me is email.
+          </p>
+          <div class="dev__actions">
+            <a href={`mailto:${CONTACT.email}`} class="btn">{CONTACT.email}</a>
+            <a href={CONTACT.github} class="link" target="_blank" rel="noopener noreferrer">GitHub</a>
+            <a href={CONTACT.linkedin} class="link" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+          </div>
+        </div>
+        <div class="dev__contact-art">
+          <LetterSketch />
+        </div>
       </div>
     </section>
 
@@ -357,61 +348,26 @@ const projectsForModalJson = JSON.stringify(projectsForModal).replace(/</g, "\\u
     </footer>
   </div>
 
-  <div class="dev__modal" id="project-modal" aria-hidden="true">
-    <div class="dev__modal-backdrop" data-close></div>
-    <div class="dev__modal-box" role="dialog" aria-modal="true" aria-labelledby="dev-modal-title">
-      <button type="button" class="dev__modal-close" data-close aria-label="Close">
-        &times;
-      </button>
-      <div class="dev__modal-info">
-        <div class="dev__modal-head">
-          <h3 id="dev-modal-title" class="dev__modal-title"></h3>
-          <span class="dev__badge dev__modal-badge" hidden></span>
-        </div>
-        <p class="dev__modal-desc"></p>
-        <ul class="dev__modal-highlights"></ul>
-        <ul class="dev__modal-tags"></ul>
-        <div class="dev__modal-links"></div>
-      </div>
-      <div class="dev__modal-media">
-        <button type="button" class="dev__modal-nav dev__modal-nav--prev" aria-label="Previous screenshot" hidden>
-          &larr;
-        </button>
-        <img class="dev__modal-img" alt="" hidden />
-        <p class="dev__modal-placeholder">Screenshot coming soon</p>
-        <button type="button" class="dev__modal-nav dev__modal-nav--next" aria-label="Next screenshot" hidden>
-          &rarr;
-        </button>
-        <span class="dev__modal-counter" hidden></span>
-      </div>
+  <dialog class="dev__modal" id="project-modal" aria-labelledby="dev-modal-title">
+    <div class="dev__modal-media">
+      <img class="dev__modal-img" alt="" />
+      <button type="button" class="dev__modal-nav dev__modal-nav--prev" aria-label="Previous screenshot">&larr;</button>
+      <button type="button" class="dev__modal-nav dev__modal-nav--next" aria-label="Next screenshot">&rarr;</button>
+      <span class="dev__modal-counter"></span>
     </div>
-  </div>
+    <div class="dev__modal-info">
+      <div class="dev__modal-head">
+        <span class="dev__badge dev__modal-badge" hidden></span>
+        <button type="button" class="dev__modal-close">Close</button>
+      </div>
+      <h3 id="dev-modal-title" class="dev__modal-title"></h3>
+      <p class="dev__modal-desc"></p>
+      <ul class="dev__modal-highlights"></ul>
+      <p class="dev__modal-stack"></p>
+      <div class="dev__modal-links"></div>
+    </div>
+  </dialog>
 </section>
-
-<script>
-  const revealTargets = Array.from(document.querySelectorAll<HTMLElement>(".dev__reveal"));
-  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  if (revealTargets.length > 0 && !reduceMotion && "IntersectionObserver" in window) {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          entry.target.classList.add("is-visible");
-          observer.unobserve(entry.target);
-        });
-      },
-      { threshold: 0.1, rootMargin: "0px 0px -60px 0px" },
-    );
-
-    revealTargets.forEach((el) => {
-      // Only arm elements that start below the fold, so nothing visible flickers on load.
-      if (el.getBoundingClientRect().top < window.innerHeight * 0.9) return;
-      el.classList.add("dev__reveal--armed");
-      observer.observe(el);
-    });
-  }
-</script>
 
 <script>
   interface ModalProject {
@@ -436,39 +392,28 @@ const projectsForModalJson = JSON.stringify(projectsForModal).replace(/</g, "\\u
   const dataEl = document.getElementById("dev-projects-data");
   const projectsData: ModalProject[] = dataEl?.textContent ? JSON.parse(dataEl.textContent) : [];
 
-  const modal = document.getElementById("project-modal");
-  const modalTitle = modal?.querySelector<HTMLElement>(".dev__modal-title");
-  const modalBadge = modal?.querySelector<HTMLElement>(".dev__modal-badge");
-  const modalDesc = modal?.querySelector<HTMLElement>(".dev__modal-desc");
-  const modalHighlights = modal?.querySelector<HTMLElement>(".dev__modal-highlights");
-  const modalTags = modal?.querySelector<HTMLElement>(".dev__modal-tags");
-  const modalLinks = modal?.querySelector<HTMLElement>(".dev__modal-links");
+  const modal = document.querySelector<HTMLDialogElement>("#project-modal");
+  const modalMedia = modal?.querySelector<HTMLElement>(".dev__modal-media");
   const modalImg = modal?.querySelector<HTMLImageElement>(".dev__modal-img");
-  const modalPlaceholder = modal?.querySelector<HTMLElement>(".dev__modal-placeholder");
-  const modalClose = modal?.querySelector<HTMLElement>(".dev__modal-close");
   const modalNavPrev = modal?.querySelector<HTMLButtonElement>(".dev__modal-nav--prev");
   const modalNavNext = modal?.querySelector<HTMLButtonElement>(".dev__modal-nav--next");
   const modalCounter = modal?.querySelector<HTMLElement>(".dev__modal-counter");
+  const modalBadge = modal?.querySelector<HTMLElement>(".dev__modal-badge");
+  const modalTitle = modal?.querySelector<HTMLElement>(".dev__modal-title");
+  const modalDesc = modal?.querySelector<HTMLElement>(".dev__modal-desc");
+  const modalHighlights = modal?.querySelector<HTMLElement>(".dev__modal-highlights");
+  const modalStack = modal?.querySelector<HTMLElement>(".dev__modal-stack");
+  const modalLinks = modal?.querySelector<HTMLElement>(".dev__modal-links");
 
-  let lastFocused: HTMLElement | null = null;
   let currentProject: ModalProject | null = null;
   let currentImageIndex = 0;
 
   function renderImage() {
     const images = currentProject?.images ?? [];
-    const hasImages = images.length > 0;
-
-    if (modalImg && modalPlaceholder) {
-      if (hasImages) {
-        modalImg.src = images[currentImageIndex];
-        modalImg.alt = currentProject ? `${currentProject.fullName} screenshot ${currentImageIndex + 1}` : "";
-        modalImg.hidden = false;
-        modalPlaceholder.hidden = true;
-      } else {
-        modalImg.hidden = true;
-        modalImg.removeAttribute("src");
-        modalPlaceholder.hidden = false;
-      }
+    if (modalMedia) modalMedia.hidden = images.length === 0;
+    if (modalImg && images.length > 0) {
+      modalImg.src = images[currentImageIndex];
+      modalImg.alt = currentProject ? `${currentProject.fullName} screenshot ${currentImageIndex + 1}` : "";
     }
 
     const showNav = images.length > 1;
@@ -480,813 +425,592 @@ const projectsForModalJson = JSON.stringify(projectsForModal).replace(/</g, "\\u
     }
   }
 
-  function showPrevImage() {
+  function step(delta: number) {
     const len = currentProject?.images.length ?? 0;
     if (len < 2) return;
-    currentImageIndex = (currentImageIndex - 1 + len) % len;
+    currentImageIndex = (currentImageIndex + delta + len) % len;
     renderImage();
   }
 
-  function showNextImage() {
-    const len = currentProject?.images.length ?? 0;
-    if (len < 2) return;
-    currentImageIndex = (currentImageIndex + 1) % len;
-    renderImage();
+  function externalLink(href: string, label: string) {
+    const a = document.createElement("a");
+    a.href = href;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    a.textContent = label;
+    return a;
   }
 
   function openModal(slug: string | undefined) {
-    if (!slug || !modal) return;
     const project = projectsData.find((p) => p.slug === slug);
-    if (!project) return;
+    if (!project || !modal) return;
 
     if (modalTitle) modalTitle.textContent = project.fullName;
+    if (modalDesc) modalDesc.textContent = project.description;
+    if (modalStack) modalStack.textContent = project.stack.join(" · ");
 
     if (modalBadge) {
+      modalBadge.hidden = !project.status;
       if (project.status) {
         modalBadge.textContent = statusLabels[project.status] ?? project.status;
         modalBadge.dataset.status = project.status;
-        modalBadge.hidden = false;
-      } else {
-        modalBadge.hidden = true;
       }
     }
 
-    if (modalDesc) modalDesc.textContent = project.description;
-
-    if (modalHighlights) {
-      modalHighlights.replaceChildren(
-        ...project.highlights.map((point) => {
-          const li = document.createElement("li");
-          li.textContent = point;
-          return li;
-        }),
-      );
-    }
-
-    if (modalTags) {
-      modalTags.replaceChildren(
-        ...project.stack.map((tech) => {
-          const li = document.createElement("li");
-          li.textContent = tech;
-          return li;
-        }),
-      );
-    }
+    modalHighlights?.replaceChildren(
+      ...project.highlights.map((point) => {
+        const li = document.createElement("li");
+        li.textContent = point;
+        return li;
+      }),
+    );
 
     if (modalLinks) {
       const links: HTMLElement[] = [];
-      if (project.href) {
-        const a = document.createElement("a");
-        a.href = project.href;
-        a.target = "_blank";
-        a.rel = "noopener noreferrer";
-        a.textContent = "Visit site";
-        links.push(a);
-      }
-      if (project.repoUrl) {
-        const a = document.createElement("a");
-        a.href = project.repoUrl;
-        a.target = "_blank";
-        a.rel = "noopener noreferrer";
-        a.textContent = "View code";
-        links.push(a);
-      }
+      if (project.href) links.push(externalLink(project.href, "Visit site ↗"));
+      if (project.repoUrl) links.push(externalLink(project.repoUrl, "View code ↗"));
       if (project.repoPrivate) {
         const span = document.createElement("span");
         span.className = "dev__project-note";
         span.textContent = "Private repository";
         links.push(span);
       }
+      links.find((el) => el instanceof HTMLAnchorElement)?.classList.add("btn");
       modalLinks.replaceChildren(...links);
     }
 
     currentProject = project;
     currentImageIndex = 0;
     renderImage();
-
-    lastFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    modal.setAttribute("aria-hidden", "false");
-    document.body.classList.add("dev__modal-open");
-    modalClose?.focus();
+    modal.showModal();
   }
 
-  function closeModal() {
-    if (!modal) return;
-    modal.setAttribute("aria-hidden", "true");
-    document.body.classList.remove("dev__modal-open");
-    lastFocused?.focus();
-  }
-
-  function isInsideLinks(target: EventTarget | null): boolean {
-    return target instanceof HTMLElement && target.closest(".dev__project-links") !== null;
-  }
-
-  document.querySelectorAll<HTMLElement>("[data-slug]").forEach((card) => {
-    card.addEventListener("click", (event) => {
-      if (isInsideLinks(event.target)) return;
-      openModal(card.dataset.slug);
-    });
-    card.addEventListener("keydown", (event) => {
-      if (event.key !== "Enter" && event.key !== " ") return;
-      if (isInsideLinks(event.target)) return;
-      event.preventDefault();
-      openModal(card.dataset.slug);
-    });
+  document.querySelectorAll<HTMLButtonElement>(".dev__project-open").forEach((button) => {
+    button.addEventListener("click", () => openModal(button.dataset.slug));
   });
 
-  modal?.querySelectorAll<HTMLElement>("[data-close]").forEach((el) => {
-    el.addEventListener("click", closeModal);
+  modal?.querySelector(".dev__modal-close")?.addEventListener("click", () => modal.close());
+  modal?.addEventListener("click", (event) => {
+    if (event.target === modal) modal.close();
   });
-
-  modalNavPrev?.addEventListener("click", showPrevImage);
-  modalNavNext?.addEventListener("click", showNextImage);
-
-  document.addEventListener("keydown", (event) => {
-    if (modal?.getAttribute("aria-hidden") !== "false") return;
-    if (event.key === "Escape") closeModal();
-    if (event.key === "ArrowLeft") showPrevImage();
-    if (event.key === "ArrowRight") showNextImage();
+  modal?.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowLeft") step(-1);
+    if (event.key === "ArrowRight") step(1);
   });
+  modalNavPrev?.addEventListener("click", () => step(-1));
+  modalNavNext?.addEventListener("click", () => step(1));
 </script>
 
 <style>
   .dev {
-    position: relative;
-    color: var(--color-text);
+    padding-bottom: var(--space-4);
   }
 
-  .dev__wash {
-    position: absolute;
-    top: -8rem;
-    left: -10%;
-    right: -10%;
-    height: 42rem;
-    z-index: 0;
-    pointer-events: none;
-    background:
-      radial-gradient(
-        42% 50% at 22% 26%,
-        color-mix(in srgb, var(--color-accent) 20%, transparent),
-        transparent 70%
-      ),
-      radial-gradient(
-        38% 46% at 82% 12%,
-        color-mix(in srgb, var(--color-accent-2) 18%, transparent),
-        transparent 70%
-      );
-    filter: blur(28px);
+  .dev__card {
+    background: var(--color-bg-raised);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    --sketch-paper: var(--color-bg-raised);
   }
 
-  .dev__container {
-    position: relative;
-    z-index: 1;
+  .dev__section {
+    padding-top: clamp(4rem, 9vw, 7rem);
   }
 
-  /* Scroll reveal ---------------------------------------------------------- */
-
-  .dev__reveal--armed {
-    opacity: 0;
-    transform: translateY(16px);
+  .dev__section-title {
+    margin-top: 0.75rem;
+    font-size: clamp(2rem, 1.4rem + 2.4vw, 3.25rem);
+    line-height: 1.08;
+    letter-spacing: -0.02em;
   }
 
-  .dev__reveal--armed.is-visible {
-    opacity: 1;
-    transform: none;
-    transition:
-      opacity 600ms ease,
-      transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  .dev__container {
-    max-width: 56rem;
-    margin: 0 auto;
-    padding: 0 var(--space-3);
-  }
-
-  /* Top bar ------------------------------------------------------------- */
-
-  .dev__topbar {
-    position: sticky;
-    top: 0;
-    z-index: 20;
-    background: color-mix(in srgb, var(--color-bg) 88%, transparent);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  .dev__topbar-inner {
-    max-width: 56rem;
-    margin: 0 auto;
-    padding: var(--space-2) var(--space-3);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-3);
-  }
-
-  .dev__brand {
-    font-weight: 600;
-    font-size: 0.95rem;
-  }
-
-  .dev__nav {
-    display: flex;
-    gap: var(--space-3);
-  }
-
-  .dev__nav a {
-    color: var(--color-text-dim);
-    text-decoration: none;
-    font-size: 0.9rem;
-    transition: color 150ms ease;
-  }
-
-  .dev__nav a:hover {
-    color: var(--color-text);
-  }
-
-  @media (max-width: 34rem) {
-    .dev__nav {
-      display: none;
-    }
-  }
-
-  /* Hero ---------------------------------------------------------------- */
+  /* Hero */
 
   .dev__hero {
-    padding: var(--space-6) 0 var(--space-5);
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    align-items: center;
+    gap: var(--space-5);
+    padding-top: clamp(3.5rem, 8vw, 6.5rem);
   }
 
   .dev__availability {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    font-size: 0.82rem;
+    gap: 0.6rem;
+    font-size: 0.875rem;
     color: var(--color-text-dim);
-    border: 1px solid var(--color-border);
-    border-radius: 999px;
-    padding: 0.3rem 0.8rem;
   }
 
   .dev__availability-dot {
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: #3ecf8e;
+    background: #4f7a4a;
+    box-shadow: 0 0 0 4px var(--fill-sage);
   }
 
   .dev__name {
-    margin-top: var(--space-3);
-    font-size: clamp(2.25rem, 6vw, 3.25rem);
-    font-weight: 700;
-    letter-spacing: -0.025em;
-    line-height: 1.1;
+    margin-top: 1.25rem;
+    font-size: clamp(3rem, 1.8rem + 5vw, 5.5rem);
+    line-height: 1;
+    letter-spacing: -0.03em;
   }
 
   .dev__role {
-    margin-top: var(--space-1);
-    font-size: 1.25rem;
-    font-weight: 500;
-    color: var(--color-accent);
+    margin-top: 0.75rem;
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: clamp(1.4rem, 1.1rem + 1vw, 1.9rem);
+    color: var(--color-text-dim);
   }
 
   .dev__lead {
     margin-top: var(--space-3);
-    max-width: 40rem;
-    font-size: 1.05rem;
+    max-width: 36rem;
+    font-size: 1.125rem;
     color: var(--color-text-dim);
   }
 
   .dev__actions {
-    margin-top: var(--space-4);
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-2);
+    align-items: center;
+    gap: 1rem 2rem;
+    margin-top: var(--space-4);
   }
 
-  .dev__btn {
-    display: inline-block;
-    padding: 0.65rem 1.25rem;
-    border-radius: 6px;
-    font-size: 0.92rem;
-    font-weight: 500;
-    text-decoration: none;
-    transition:
-      background 150ms ease,
-      border-color 150ms ease,
-      color 150ms ease;
+  .dev__hero-art {
+    max-width: 440px;
+    justify-self: center;
+    width: 100%;
   }
 
-  .dev__btn--primary {
-    background: var(--color-accent);
-    color: #08111f;
-    border: 1px solid var(--color-accent);
-  }
+  /* About */
 
-  .dev__btn--primary:hover {
-    background: color-mix(in srgb, var(--color-accent) 85%, white);
-  }
-
-  .dev__btn--secondary {
-    border: 1px solid var(--color-border);
-    color: var(--color-text);
-  }
-
-  .dev__btn--secondary:hover {
-    border-color: var(--color-accent);
-    color: var(--color-accent);
-  }
-
-  /* Sections ------------------------------------------------------------ */
-
-  .dev__section {
-    padding: var(--space-5) 0;
-    border-top: 1px solid var(--color-border);
-  }
-
-  .dev__section-title {
-    font-size: 0.82rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--color-text-dim);
-    margin-bottom: var(--space-3);
-  }
-
-  /* About --------------------------------------------------------------- */
-
-  .dev__about {
+  .dev__split {
     display: grid;
-    gap: var(--space-4);
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1.4fr;
+    gap: var(--space-5);
   }
 
-  @media (min-width: 48rem) {
-    .dev__about {
-      grid-template-columns: 1.6fr 1fr;
-    }
-  }
-
-  .dev__about-text p + p {
-    margin-top: var(--space-2);
-  }
-
-  .dev__about-text p {
+  .dev__about-text {
+    display: grid;
+    gap: 1.25rem;
+    font-size: 1.125rem;
     color: var(--color-text-dim);
+    padding-top: 2rem;
   }
 
   .dev__facts {
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
+    margin: var(--space-4) 0 0;
+    border-top: 1px solid var(--color-border-strong);
   }
 
-  .dev__fact dt {
-    font-size: 0.78rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+  .dev__facts div {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 1.5rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--color-border-strong);
+  }
+
+  .dev__facts dt {
+    font-size: 0.875rem;
     color: var(--color-text-dim);
   }
 
-  .dev__fact dd {
-    margin: 0.15rem 0 0;
-    font-size: 0.95rem;
+  .dev__facts dd {
+    margin: 0;
   }
 
-  /* Stack --------------------------------------------------------------- */
+  /* Stack */
 
-  .dev__stack-groups {
+  .dev__stack {
     display: grid;
-    gap: var(--space-3);
-    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-top: var(--space-4);
+  }
+
+  .dev__stack-group {
+    padding: 1.75rem;
   }
 
   .dev__stack-label {
-    font-size: 0.9rem;
-    font-weight: 600;
-    margin-bottom: var(--space-1);
+    font-size: 1.375rem;
   }
 
   .dev__stack-list {
     list-style: none;
-    margin: 0;
+    margin: 1rem 0 0;
     padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 0.3rem;
-  }
-
-  .dev__stack-list li {
-    font-size: 0.92rem;
+    display: grid;
+    gap: 0.35rem;
     color: var(--color-text-dim);
   }
 
-  /* Projects ------------------------------------------------------------ */
+  /* Projects */
 
   .dev__projects {
     list-style: none;
-    margin: 0;
+    margin: var(--space-4) 0 0;
     padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
   }
 
   .dev__project {
-    border: 1px solid var(--color-border);
-    border-radius: 10px;
-    background: var(--color-bg-raised);
-    padding: var(--space-3);
-    transition:
-      border-color 200ms ease,
-      transform 200ms ease,
-      box-shadow 200ms ease,
-      background 200ms ease;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 2rem;
+    transition: border-color 200ms ease;
   }
 
   .dev__project:hover {
-    border-color: color-mix(in srgb, var(--color-accent) 50%, var(--color-border));
-    background: var(--color-bg-hover);
-    transform: translateY(-3px);
-    box-shadow:
-      0 12px 28px -18px rgba(0, 0, 0, 0.9),
-      0 0 32px -22px var(--color-accent);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .dev__project:hover {
-      transform: none;
-    }
-  }
-
-  .dev__project-head {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-  }
-
-  .dev__project-title {
-    font-size: 1.1rem;
-    font-weight: 600;
+    border-color: var(--color-border-strong);
   }
 
   .dev__badge {
-    font-size: 0.7rem;
-    font-weight: 500;
-    letter-spacing: 0.03em;
-    color: var(--color-text-dim);
-    border: 1px solid var(--color-border);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.15rem 0.65rem;
     border-radius: 999px;
-    padding: 0.1rem 0.55rem;
+    font-size: 0.8rem;
+    background: var(--color-bg-deep);
   }
 
   .dev__badge[data-status="live"] {
-    color: #3ecf8e;
-    border-color: color-mix(in srgb, #3ecf8e 45%, transparent);
+    background: var(--fill-sage);
   }
 
-  .dev__project-desc {
-    margin-top: var(--space-1);
-    color: var(--color-text-dim);
-    font-size: 0.95rem;
+  .dev__badge[data-status="ongoing"] {
+    background: var(--fill-ochre);
   }
 
-  .dev__project-highlights {
-    margin: var(--space-2) 0 0;
-    padding-left: 1.15rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
+  .dev__project-title {
+    margin-top: 1rem;
+    font-size: 1.75rem;
+    line-height: 1.15;
   }
 
-  .dev__project-highlights li {
-    font-size: 0.9rem;
-    color: var(--color-text-dim);
-  }
-
-  .dev__project-highlights li::marker {
-    color: var(--color-accent);
-  }
-
-  .dev__tags {
-    list-style: none;
-    margin: var(--space-2) 0 0;
+  .dev__project-open {
+    appearance: none;
+    border: none;
+    background: none;
     padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-  }
-
-  .dev__tags li {
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    color: var(--color-text-dim);
-    background: color-mix(in srgb, var(--color-text) 6%, transparent);
-    border-radius: 4px;
-    padding: 0.2rem 0.5rem;
-  }
-
-  .dev__project-links {
-    margin-top: var(--space-2);
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-3);
-    font-size: 0.9rem;
-  }
-
-  .dev__project-links a {
-    color: var(--color-accent);
-    text-decoration: none;
-  }
-
-  .dev__project-links a:hover {
-    text-decoration: underline;
-  }
-
-  /* Unscoped: also used for a <span> the modal script creates dynamically. */
-  :global(.dev__project-note) {
-    color: var(--color-text-dim);
-    font-size: 0.85rem;
-  }
-
-  .dev__project--clickable {
+    text-align: left;
     cursor: pointer;
+    font-family: inherit;
+    font-size: inherit;
+    letter-spacing: inherit;
   }
 
-  .dev__project--clickable:focus-visible {
+  /* Stretch the button over the whole card */
+  .dev__project-open::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius);
+  }
+
+  .dev__project-open:focus-visible {
+    outline: none;
+  }
+
+  .dev__project-open:focus-visible::after {
     outline: 2px solid var(--color-accent);
     outline-offset: 3px;
   }
 
-  .dev__project-hint {
-    margin: var(--space-2) 0 0;
-    font-size: 0.82rem;
-    color: var(--color-accent);
-    text-align: right;
+  .dev__project-desc {
+    margin-top: 0.6rem;
+    color: var(--color-text-dim);
   }
 
-  /* Project modal --------------------------------------------------------- */
+  .dev__project-stack {
+    margin-top: 1.25rem;
+    font-size: 0.875rem;
+    color: var(--color-text-dim);
+  }
 
-  .dev__modal {
-    position: fixed;
-    inset: 0;
-    z-index: 100;
+  .dev__project-links {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    justify-content: center;
-    padding: var(--space-4);
+    gap: 0.5rem 1.5rem;
+    margin-top: auto;
+    padding-top: 1.5rem;
+    font-size: 0.925rem;
+    font-weight: 500;
   }
 
-  .dev__modal[aria-hidden="true"] {
-    display: none;
+  .dev__project-more {
+    text-decoration: underline;
+    text-decoration-color: var(--color-border-strong);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 5px;
+    transition: text-decoration-color 200ms ease;
   }
 
-  .dev__modal-backdrop {
-    position: absolute;
-    inset: 0;
-    background: color-mix(in srgb, black 70%, transparent);
-    backdrop-filter: blur(4px);
+  .dev__project:hover .dev__project-more {
+    text-decoration-color: var(--color-text);
   }
 
-  .dev__modal-box {
+  .dev__project-links a {
     position: relative;
     z-index: 1;
-    width: min(68rem, 100%);
-    height: min(40rem, 88vh);
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    background: var(--color-bg-raised);
-    border: 1px solid var(--color-border);
-    border-radius: 14px;
-    overflow: hidden;
-    box-shadow:
-      0 40px 90px -30px rgba(0, 0, 0, 0.85),
-      0 0 60px -30px var(--color-accent);
-  }
-
-  .dev__modal-close {
-    position: absolute;
-    top: var(--space-2);
-    right: var(--space-2);
-    z-index: 2;
-    width: 2rem;
-    height: 2rem;
-    display: grid;
-    place-items: center;
-    border-radius: 50%;
-    border: 1px solid var(--color-border);
-    background: var(--color-bg-raised);
-    color: var(--color-text);
-    font-size: 1.1rem;
-    line-height: 1;
-    cursor: pointer;
-    transition:
-      border-color 150ms ease,
-      color 150ms ease;
-  }
-
-  .dev__modal-close:hover {
-    border-color: var(--color-accent);
-    color: var(--color-accent);
-  }
-
-  .dev__modal-info {
-    padding: var(--space-4);
-    overflow-y: auto;
-    border-right: 1px solid var(--color-border);
-  }
-
-  .dev__modal-head {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-  }
-
-  .dev__modal-title {
-    font-size: 1.35rem;
-    font-weight: 600;
-  }
-
-  .dev__modal-desc {
-    margin-top: var(--space-2);
     color: var(--color-text-dim);
-  }
-
-  .dev__modal-highlights {
-    margin: var(--space-3) 0 0;
-    padding-left: 1.15rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-  }
-
-  /* These three rules target <li>/<a>/<span> nodes the modal script creates at
-     runtime with document.createElement, which never receive Astro's scoped
-     data-astro-cid attribute — so the selectors must stay unscoped to match them. */
-  :global(.dev__modal-highlights li) {
-    font-size: 0.92rem;
-    color: var(--color-text-dim);
-  }
-
-  :global(.dev__modal-highlights li::marker) {
-    color: var(--color-accent);
-  }
-
-  .dev__modal-tags {
-    list-style: none;
-    margin: var(--space-3) 0 0;
-    padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-  }
-
-  :global(.dev__modal-tags li) {
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    color: var(--color-text-dim);
-    background: color-mix(in srgb, var(--color-text) 6%, transparent);
-    border-radius: 4px;
-    padding: 0.2rem 0.5rem;
-  }
-
-  .dev__modal-links {
-    margin-top: var(--space-3);
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-3);
-    font-size: 0.9rem;
-  }
-
-  :global(.dev__modal-links a) {
-    color: var(--color-accent);
     text-decoration: none;
   }
 
-  :global(.dev__modal-links a:hover) {
-    text-decoration: underline;
+  .dev__project-links a:hover {
+    color: var(--color-text);
+  }
+
+  .dev__project-note {
+    font-weight: 400;
+    color: var(--color-text-dim);
+  }
+
+  /* Contact */
+
+  .dev__contact {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    align-items: center;
+    gap: var(--space-4);
+    padding: clamp(2rem, 5vw, 4rem);
+  }
+
+  .dev__contact-lead {
+    margin-top: 1.25rem;
+    max-width: 32rem;
+    font-size: 1.125rem;
+    color: var(--color-text-dim);
+  }
+
+  .dev__contact-art {
+    max-width: 280px;
+    width: 100%;
+    justify-self: center;
+  }
+
+  .dev__footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: var(--space-6);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-border);
+    font-size: 0.875rem;
+    color: var(--color-text-dim);
+  }
+
+  /* Project dialog */
+
+  .dev__modal {
+    width: min(760px, calc(100% - 2rem));
+    max-height: calc(100svh - 2rem);
+    padding: 0;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-bg-raised);
+    color: var(--color-text);
+    overflow: auto;
+  }
+
+  .dev__modal::backdrop {
+    background: rgb(31 29 26 / 0.3);
   }
 
   .dev__modal-media {
     position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-3);
-    background: color-mix(in srgb, var(--color-text) 4%, var(--color-bg));
+    background: var(--color-bg-deep);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .dev__modal-media[hidden] {
+    display: none;
   }
 
   .dev__modal-img {
-    max-width: 100%;
-    max-height: 100%;
+    width: 100%;
+    aspect-ratio: 16 / 10;
     object-fit: contain;
-    border-radius: 8px;
-    box-shadow: 0 12px 30px -16px rgba(0, 0, 0, 0.6);
-  }
-
-  .dev__modal-placeholder {
-    color: var(--color-text-dim);
-    font-size: 0.9rem;
   }
 
   .dev__modal-nav {
     position: absolute;
     top: 50%;
-    transform: translateY(-50%);
-    z-index: 2;
-    width: 2.25rem;
-    height: 2.25rem;
-    display: grid;
-    place-items: center;
-    border-radius: 50%;
+    translate: 0 -50%;
+    width: 2.5rem;
+    height: 2.5rem;
     border: 1px solid var(--color-border);
-    background: color-mix(in srgb, var(--color-bg-raised) 85%, transparent);
-    color: var(--color-text);
-    font-size: 1.1rem;
-    line-height: 1;
+    border-radius: 50%;
+    background: var(--color-bg-raised);
     cursor: pointer;
-    backdrop-filter: blur(4px);
-    transition:
-      border-color 150ms ease,
-      color 150ms ease;
-  }
-
-  .dev__modal-nav:hover {
-    border-color: var(--color-accent);
-    color: var(--color-accent);
   }
 
   .dev__modal-nav--prev {
-    left: var(--space-2);
+    left: 1rem;
   }
 
   .dev__modal-nav--next {
-    right: var(--space-2);
+    right: 1rem;
+  }
+
+  .dev__modal-nav[hidden],
+  .dev__modal-counter[hidden] {
+    display: none;
   }
 
   .dev__modal-counter {
     position: absolute;
-    bottom: var(--space-2);
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 2;
-    font-size: 0.78rem;
-    color: var(--color-text-dim);
-    background: color-mix(in srgb, var(--color-bg-raised) 85%, transparent);
-    border: 1px solid var(--color-border);
+    right: 1rem;
+    bottom: 1rem;
+    padding: 0.1rem 0.6rem;
     border-radius: 999px;
-    padding: 0.15rem 0.6rem;
-    backdrop-filter: blur(4px);
-  }
-
-  @media (max-width: 44rem) {
-    .dev__modal-box {
-      grid-template-columns: 1fr;
-      grid-template-rows: auto auto;
-      height: min(86vh, 100%);
-      overflow-y: auto;
-    }
-
-    .dev__modal-info {
-      border-right: none;
-      border-bottom: 1px solid var(--color-border);
-    }
-
-    .dev__modal-media {
-      min-height: 14rem;
-    }
-  }
-
-  :global(body.dev__modal-open) {
-    overflow: hidden;
-  }
-
-  /* Contact + footer ------------------------------------------------------ */
-
-  .dev__contact-lead {
-    max-width: 38rem;
+    background: var(--color-bg-raised);
+    font-size: 0.8rem;
     color: var(--color-text-dim);
   }
 
-  .dev__contact-links {
-    margin-top: var(--space-3);
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
+  .dev__modal-info {
+    padding: clamp(1.5rem, 4vw, 2.5rem);
   }
 
-  .dev__footer {
-    padding: var(--space-4) 0 var(--space-5);
-    border-top: 1px solid var(--color-border);
+  .dev__modal-head {
     display: flex;
-    flex-wrap: wrap;
+    align-items: center;
     justify-content: space-between;
-    gap: var(--space-1);
-    font-size: 0.85rem;
+    gap: 1rem;
+  }
+
+  .dev__modal-close {
+    margin-left: auto;
+    border: none;
+    background: none;
+    padding: 0.25rem 0;
+    font-size: 0.9rem;
     color: var(--color-text-dim);
+    cursor: pointer;
+  }
+
+  .dev__modal-close:hover {
+    color: var(--color-text);
+  }
+
+  .dev__modal-title {
+    margin-top: 0.75rem;
+    font-size: 2.25rem;
+    line-height: 1.1;
+  }
+
+  .dev__modal-desc {
+    margin-top: 1rem;
+    color: var(--color-text-dim);
+  }
+
+  .dev__modal-highlights {
+    list-style: none;
+    margin: 1.5rem 0 0;
+    padding: 0;
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .dev__modal-highlights :global(li) {
+    position: relative;
+    padding-left: 1.75rem;
+  }
+
+  .dev__modal-highlights :global(li)::before {
+    content: "";
+    position: absolute;
+    left: 0.15rem;
+    top: 0.45em;
+    width: 0.75rem;
+    height: 0.4rem;
+    border-left: 2px solid var(--color-accent);
+    border-bottom: 2px solid var(--color-accent);
+    rotate: -45deg;
+  }
+
+  .dev__modal-stack {
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--color-border);
+    font-size: 0.875rem;
+    color: var(--color-text-dim);
+  }
+
+  .dev__modal-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.5rem;
+    margin-top: 1.25rem;
+    font-weight: 500;
+  }
+
+  .dev__modal-links :global(a:not(.btn)) {
+    color: var(--color-text-dim);
+    text-decoration: none;
+  }
+
+  .dev__modal-links :global(a:not(.btn):hover) {
+    color: var(--color-text);
+  }
+
+  .dev__modal-links :global(.dev__project-note) {
+    font-weight: 400;
+    color: var(--color-text-dim);
+  }
+
+  /* Responsive */
+
+  @media (max-width: 900px) {
+    .dev__hero,
+    .dev__split,
+    .dev__contact {
+      grid-template-columns: 1fr;
+      gap: var(--space-4);
+    }
+
+    .dev__hero-art {
+      max-width: 380px;
+    }
+
+    .dev__about-text {
+      padding-top: 0;
+    }
+
+    .dev__stack {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dev__projects {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .dev__stack {
+      grid-template-columns: 1fr;
+    }
+
+    .dev__facts div {
+      grid-template-columns: 1fr;
+      gap: 0.25rem;
+    }
+
+    .dev__project {
+      padding: 1.5rem;
+    }
   }
 </style>
