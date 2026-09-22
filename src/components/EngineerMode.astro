@@ -13,7 +13,7 @@ interface Project {
   href?: string;
   repoUrl?: string;
   repoPrivate?: boolean;
-  status?: "live" | "private" | "ongoing";
+  status?: "live" | "private" | "ongoing" | "contributor";
 }
 
 const projects: Project[] = [
@@ -91,6 +91,21 @@ const projects: Project[] = [
     stack: ["Rust", "Tauri", "React", "TypeScript", "Fastify", "PostgreSQL", "Drizzle"],
     repoUrl: "https://github.com/FilipKlaic/Atrium",
     status: "ongoing",
+  },
+  {
+    nickname: "restall",
+    fullName: "Restall",
+    slug: "restall",
+    description:
+      "Open-source desktop app for Windows and Linux that installs, updates and removes ReShade and RenoDX mods. I've recently been invited to contribute.",
+    highlights: [
+      "Finds installed games across Steam, Epic, GOG, Ubisoft Connect, EA App and Xbox Game Pass, plus Heroic on Linux",
+      "Parses game executables to check mod compatibility before anything is installed",
+      "Built with Avalonia and MVVM, with Docker builds for both Windows and Linux",
+    ],
+    stack: ["C#", ".NET 10", "Avalonia", "CommunityToolkit.Mvvm", "Docker"],
+    repoUrl: "https://github.com/fornkatt/Restall",
+    status: "contributor",
   },
   {
     nickname: "kova",
@@ -178,6 +193,7 @@ const statusLabels: Record<string, string> = {
   live: "Live",
   private: "Private",
   ongoing: "In progress",
+  contributor: "Contributor",
 };
 
 const projectsForModal = projects.map((project) => ({
@@ -379,7 +395,7 @@ const projectsForModalJson = JSON.stringify(projectsForModal).replace(/</g, "\\u
     href: string | null;
     repoUrl: string | null;
     repoPrivate: boolean;
-    status: "live" | "private" | "ongoing" | null;
+    status: "live" | "private" | "ongoing" | "contributor" | null;
     images: string[];
   }
 
@@ -387,6 +403,7 @@ const projectsForModalJson = JSON.stringify(projectsForModal).replace(/</g, "\\u
     live: "Live",
     private: "Private",
     ongoing: "In progress",
+    contributor: "Contributor",
   };
 
   const dataEl = document.getElementById("dev-projects-data");
@@ -686,6 +703,10 @@ const projectsForModalJson = JSON.stringify(projectsForModal).replace(/</g, "\\u
 
   .dev__badge[data-status="live"] {
     background: var(--fill-sage);
+  }
+
+  .dev__badge[data-status="contributor"] {
+    background: var(--fill-sky);
   }
 
   .dev__badge[data-status="ongoing"] {
