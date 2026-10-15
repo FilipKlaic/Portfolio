@@ -1,27 +1,24 @@
 /* Design tokens ------------------------------------------------------- */
 
 :root {
-  /* paper & ink */
-  --color-bg: #f6f3ec;
-  --color-bg-raised: #fbf9f4;
-  --color-bg-deep: #efeae0;
-  --color-border: #e0d9cb;
-  --color-border-strong: #d6cfbf;
+  color-scheme: dark;
 
-  --color-text: #1f1d1a;
-  --color-text-dim: #6b665c;
+  /* near-black surfaces */
+  --color-bg: #0c0c0d;
+  --color-bg-raised: #141416;
+  --color-bg-deep: #1b1b1e;
+  --color-border: #232327;
+  --color-border-strong: #34343a;
 
-  /* the one accent: ink blue */
-  --color-accent: #2f4f7f;
+  --color-text: #f3f3ef;
+  --color-text-dim: #8e8e95;
 
-  /* illustration & badge fills */
-  --fill-sky: #c6d6e8;
-  --fill-ochre: #ecc98a;
-  --fill-sage: #c5d0b1;
-  --fill-clay: #e6b59d;
+  /* the one accent: signal lime */
+  --color-accent: #d4ff3f;
+  --color-accent-ink: #0c0c0d;
 
-  --font-sans: "Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-serif: "Newsreader", Georgia, "Times New Roman", serif;
+  --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
 
   --space-1: 0.5rem;
   --space-2: 1rem;
@@ -30,7 +27,7 @@
   --space-5: 4rem;
   --space-6: 6rem;
 
-  --radius: 20px;
+  --radius: 14px;
   --container: 1120px;
   --gutter: clamp(1.25rem, 4vw, 3rem);
 
@@ -86,8 +83,8 @@ button {
 }
 
 ::selection {
-  background: var(--fill-sky);
-  color: var(--color-text);
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
 }
 
 h1,
@@ -100,9 +97,8 @@ p {
 h1,
 h2,
 h3 {
-  font-family: var(--font-serif);
-  font-weight: 400;
-  letter-spacing: -0.015em;
+  font-weight: 600;
+  letter-spacing: -0.035em;
 }
 
 :focus-visible {
@@ -126,25 +122,36 @@ h3 {
 }
 
 .eyebrow {
-  font-size: 0.875rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
   color: var(--color-text-dim);
+}
+
+.eyebrow::before {
+  content: "// ";
+  color: var(--color-accent);
 }
 
 .btn {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
+  padding: 0.75rem 1.4rem;
   border-radius: 999px;
-  background: var(--color-text);
-  color: var(--color-bg);
-  font-weight: 500;
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+  font-weight: 600;
   text-decoration: none;
-  transition: opacity 200ms ease;
+  transition:
+    transform 200ms ease,
+    box-shadow 200ms ease;
 }
 
 .btn:hover {
-  opacity: 0.85;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px -8px color-mix(in srgb, var(--color-accent) 60%, transparent);
 }
 
 .link {
@@ -153,11 +160,14 @@ h3 {
   text-decoration-color: var(--color-border-strong);
   text-decoration-thickness: 2px;
   text-underline-offset: 6px;
-  transition: text-decoration-color 200ms ease;
+  transition:
+    text-decoration-color 200ms ease,
+    color 200ms ease;
 }
 
 .link:hover {
-  text-decoration-color: var(--color-text);
+  color: var(--color-accent);
+  text-decoration-color: var(--color-accent);
 }
 
 /* Mode panels ------------------------------------------------------------ */
